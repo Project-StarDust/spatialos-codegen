@@ -1,0 +1,7 @@
+package io.nebulis.player;
+
+component AnimationWalkingSpeed {
+    id = 600;
+    float walking_speed = 1;
+    option<bool> has_anim = 2;
+}
