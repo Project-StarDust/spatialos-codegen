@@ -1,5 +1,5 @@
 [package]
-name = "spatial_codegen"
+name = "spatialos-codegen"
 version = "1.0.0"
 authors = ["Thomas Nicollet <thomas.nicollet@epitech.eu>"]
 edition = "2018"

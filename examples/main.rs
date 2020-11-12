@@ -1,4 +1,4 @@
-use spatial_codegen::AST;
+use spatialos_codegen::AST;
 
 fn main() -> () {
     let schema = AST::from("./examples/schema");
