@@ -9,11 +9,10 @@ pub mod header;
 pub mod member;
 pub mod package_node;
 pub mod schema_file;
-pub mod std;
 pub mod r#type;
 pub mod value;
 
-pub use root::AST;
+pub use root::{AST, ASTBuilder};
 pub use ast_node::ASTNode;
 pub use command::Command;
 pub use component::Component;

@@ -1,7 +1,9 @@
-use spatialos_codegen::AST;
+use spatialos_codegen::ASTBuilder;
 
 fn main() -> () {
-    let schema = AST::from("./examples/schema");
+    let schema = ASTBuilder::default()
+        .with_directory("./examples/schema")
+        .build();
     println!("{:#?}", schema);
     let result = schema.generate("./examples/test/src/generated");
     println!("{:#?}", result);

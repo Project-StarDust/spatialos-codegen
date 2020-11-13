@@ -1,4 +1,4 @@
 mod ast;
 mod parser;
 
-pub use ast::AST;
+pub use ast::ASTBuilder;

@@ -9,7 +9,12 @@ pub struct Member {
 
 impl Member {
     pub fn generate_one(&self) -> String {
-        format!("    {}: {}", self.name, self.m_type.rust_type())
+        format!(
+            "    #[field_id({})] {}: {}",
+            self.id,
+            self.name,
+            self.m_type.rust_type()
+        )
     }
 
     pub fn generate_multiple(data: &[Self]) -> String {

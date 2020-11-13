@@ -1,4 +1,3 @@
-use crate::ast::std::generate_standard_library;
 use crate::ast::ASTNode;
 use crate::ast::SchemaFile;
 use std::convert::TryFrom;
@@ -7,15 +6,57 @@ use std::path::Path;
 use std::path::PathBuf;
 use walkdir::WalkDir;
 
-#[derive(Debug, Eq, PartialEq)]
-pub struct AST {
-    pub inner: Vec<ASTNode>,
+#[derive(Debug, Eq, PartialEq, Default)]
+pub struct ASTBuilder {
+    directories: Vec<PathBuf>,
 }
 
-impl Default for AST {
-    fn default() -> Self {
-        generate_standard_library()
+#[allow(dead_code)]
+impl ASTBuilder {
+    pub fn build(self) -> AST {
+        self.directories
+            .into_iter()
+            .map(|d| {
+                WalkDir::new(d)
+                    .follow_links(true)
+                    .into_iter()
+                    .filter_map(|e| e.ok())
+                    .map(|e| {
+                        e.path()
+                            .to_str()
+                            .map(|s| s.to_string())
+                            .ok_or("Can't tranform into &str")
+                    })
+                    .filter_map(Result::ok)
+                    .map(PathBuf::from)
+                    .filter(|p| p.extension() == Some(OsStr::new("schema")))
+                    .map(SchemaFile::try_from)
+                    .map(|schemas| match schemas {
+                        Ok(data) => Ok(data),
+                        Err(e) => {
+                            eprintln!("{}", e);
+                            Err(())
+                        }
+                    })
+                    .filter_map(Result::ok)
+                    .collect::<Vec<_>>()
+            })
+            .flatten()
+            .fold(AST::default(), |acc, val| {
+                acc.merge_schema(&val, &val.package_name)
+            })
     }
+
+    pub fn with_directory<P: AsRef<Path>>(mut self, path: P) -> Self {
+        let path = path.as_ref().to_path_buf();
+        self.directories.push(path);
+        self
+    }
+}
+
+#[derive(Debug, Eq, PartialEq, Default)]
+pub struct AST {
+    pub inner: Vec<ASTNode>,
 }
 
 impl AST {
@@ -56,35 +97,5 @@ impl AST {
         } else {
             panic!("SchemaFile does not have a package name");
         }
-    }
-}
-
-impl<P: AsRef<Path>> From<P> for AST {
-    fn from(path: P) -> Self {
-        WalkDir::new(path)
-            .follow_links(true)
-            .into_iter()
-            .filter_map(|e| e.ok())
-            .map(|e| {
-                e.path()
-                    .to_str()
-                    .map(|s| s.to_string())
-                    .ok_or("Can't tranform into &str")
-            })
-            .filter_map(Result::ok)
-            .map(PathBuf::from)
-            .filter(|p| p.extension() == Some(OsStr::new("schema")))
-            .map(SchemaFile::try_from)
-            .map(|schemas| match schemas {
-                Ok(data) => Ok(data),
-                Err(e) => {
-                    eprintln!("{}", e);
-                    Err(())
-                }
-            })
-            .filter_map(Result::ok)
-            .fold(Self::default(), |acc, val| {
-                acc.merge_schema(&val, &val.package_name)
-            })
     }
 }

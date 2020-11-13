@@ -15,8 +15,10 @@ pub struct Component {
 impl Component {
     pub fn generate_one(&self) -> String {
         format!(
-            "{}\nstruct {} {{{}}}",
-            format!("#[spatial_component({})]", self.id),
+            "{}\n{}\n{}\nstruct {} {{{}}}",
+            format!("#[allow(dead_code)]"),
+            format!("#[derive(SpatialComponent)]"),
+            format!("#[id({})]", self.id),
             self.name,
             Member::generate_multiple(&self.members)
         )
