@@ -10,7 +10,7 @@ pub struct Member {
 impl Member {
     pub fn generate_one(&self) -> String {
         format!(
-            "    #[field_id({})] {}: {}",
+            "    #[field_id({})]\n    {}: {},",
             self.id,
             self.name,
             self.m_type.rust_type()
@@ -24,7 +24,7 @@ impl Member {
                 .map(Member::generate_one)
                 .fold(String::new(), |acc, val| {
                     if !acc.is_empty() {
-                        acc + ",\n" + &val
+                        acc + "\n" + &val
                     } else {
                         val
                     }

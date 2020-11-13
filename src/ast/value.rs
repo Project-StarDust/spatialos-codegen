@@ -6,7 +6,7 @@ pub struct Value {
 
 impl Value {
     pub fn generate_one(&self) -> String {
-        format!("    {}", self.name)
+        format!("    {},", self.name)
     }
 
     pub fn generate_multiple(data: &[Self]) -> String {
@@ -16,7 +16,7 @@ impl Value {
                 .map(Self::generate_one)
                 .fold(String::new(), |acc, val| {
                     if !acc.is_empty() {
-                        acc + ",\n" + &val
+                        acc + "\n" + &val
                     } else {
                         val
                     }

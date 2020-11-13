@@ -10,8 +10,9 @@ pub struct Type {
 impl Type {
     pub fn generate_one(&self) -> String {
         format!(
-            "{}\nstruct {} {{{}}}",
-            "#[spatial_type]",
+            "{}\n{}\npub struct {} {{{}}}",
+            "#[allow(dead_code)]",
+            "#[derive(SpatialType)]",
             self.name,
             Member::generate_multiple(&self.members)
         )

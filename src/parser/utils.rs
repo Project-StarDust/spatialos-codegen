@@ -22,8 +22,13 @@ named!(
 );
 
 named!(
+    pub lower_alphanum<char>,
+    one_of!("abcdefghijklmnopqrstuvwxyz0123456789")
+);
+
+named!(
     pub camel_case_component<String>,
-    map!(pair!(uppercase, many0!(lowercase)), |(c, s)| c.to_string() + &s.iter().collect::<String>())
+    map!(pair!(uppercase, many0!(lower_alphanum)), |(c, s)| c.to_string() + &s.iter().collect::<String>())
 );
 
 named!(
@@ -33,7 +38,7 @@ named!(
 
 named!(
     pub snake_case_component<String>,
-    fold_many1!(lowercase, String::new(), |acc, val| acc + &val.to_string())
+    fold_many1!(lower_alphanum, String::new(), |acc, val| acc + &val.to_string())
 );
 
 named!(

@@ -22,7 +22,7 @@ pub struct SchemaFile {
 impl SchemaFile {
     fn generate(&self) -> String {
         format!(
-            "{}\n{}\n{}\n{}\n",
+            "{}{}{}{}",
             Header::generate(),
             Enum::generate_multiple(&self.enums),
             Type::generate_multiple(&self.types),
@@ -41,7 +41,7 @@ impl SchemaFile {
     pub fn generate_schema<P: AsRef<Path> + Clone>(&self, path: P) -> Result<(), std::io::Error> {
         std::fs::create_dir_all(path.clone()).map(|_| {
             let mut file = File::create(path.clone().as_ref().join(self.name.clone() + ".rs"))?;
-            writeln!(file, "{}\n", self.generate())?;
+            writeln!(file, "{}", self.generate())?;
             Ok(())
         })?
     }

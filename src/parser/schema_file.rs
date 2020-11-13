@@ -10,8 +10,8 @@ use nom::alt;
 use nom::character::complete::multispace0;
 use nom::delimited;
 use nom::do_parse;
+use nom::many0;
 use nom::named;
-use nom::separated_list;
 
 #[derive(Default)]
 pub struct SchemaFileBuilder {
@@ -73,7 +73,7 @@ named!(
 
 named!(
     parse_models<Vec<SchemaModel>>,
-    separated_list!(multispace0, parse_model)
+    many0!(delimited!(multispace0, parse_model, multispace0))
 );
 
 named!(

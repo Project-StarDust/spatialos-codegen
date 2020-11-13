@@ -15,7 +15,7 @@ pub struct Component {
 impl Component {
     pub fn generate_one(&self) -> String {
         format!(
-            "{}\n{}\n{}\nstruct {} {{{}}}",
+            "{}\n{}\n{}\npub struct {} {{{}}}",
             format!("#[allow(dead_code)]"),
             format!("#[derive(SpatialComponent)]"),
             format!("#[id({})]", self.id),
