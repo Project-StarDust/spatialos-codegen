@@ -5,12 +5,20 @@ pub struct Member {
     pub name: String,
     pub m_type: DataType,
     pub id: usize,
+    pub comments: Vec<String>,
 }
 
 impl Member {
     pub fn generate_one(&self) -> String {
         format!(
-            "    #[field_id({})]\n    {}: {},",
+            "{}    #[field_id({})]\n    {}: {},",
+            self.comments.iter().fold(String::new(), |acc, val| {
+                if !acc.is_empty() {
+                    acc + &format!("    #[doc = \"{}\"]\n", val)
+                } else {
+                    format!("    #[doc = \"{}\"]\n", val)
+                }
+            }),
             self.id,
             self.name,
             self.m_type.rust_type()

@@ -6,14 +6,16 @@ use nom::do_parse;
 use nom::named;
 use nom::tag;
 
+use crate::parser::utils::parse_comments;
 use crate::parser::utils::upper_snake_case as parse_value_name;
 
 named!(
     pub parse_value<Value>,
     do_parse!(
+        comments: parse_comments >>
         name: parse_value_name
             >> delimited!(multispace0, tag!("="), multispace0)
             >> id: parse_usize
-            >> (Value { name, id })
+            >> (Value { name, id, comments })
     )
 );

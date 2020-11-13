@@ -10,13 +10,21 @@ pub struct Component {
     pub members: Vec<Member>,
     pub events: Vec<Event>,
     pub commands: Vec<Command>,
+    pub comments: Vec<String>,
 }
 
 impl Component {
     pub fn generate_one(&self) -> String {
         format!(
-            "{}\n{}\n{}\npub struct {} {{{}}}",
+            "{}\n{}{}\n{}\npub struct {} {{{}}}",
             format!("#[allow(dead_code)]"),
+            self.comments.iter().fold(String::new(), |acc, val| {
+                if !acc.is_empty() {
+                    acc + &format!("#[doc = \"{}\"]\n", val)
+                } else {
+                    format!("#[doc = \"{}\"]\n", val)
+                }
+            }),
             format!("#[derive(SpatialComponent)]"),
             format!("#[id({})]", self.id),
             self.name,

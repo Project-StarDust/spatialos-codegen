@@ -14,6 +14,7 @@ use nom::terminated;
 use nom::tuple;
 
 use crate::parser::utils::camel_case as parse_enum_name;
+use crate::parser::utils::parse_comments;
 use crate::parser::value::parse_value;
 
 named!(
@@ -36,9 +37,10 @@ named!(
 named!(
     pub parse_enum<Enum>,
     do_parse!(
+        comments: parse_comments >>
         complete!(tag!("enum"))
             >> name: delimited!(multispace1, parse_enum_name, multispace1)
             >> values: parse_enum_body
-            >> (Enum { name, values })
+            >> (Enum { name, values, comments })
     )
 );

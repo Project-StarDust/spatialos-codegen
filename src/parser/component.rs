@@ -21,6 +21,7 @@ use crate::parser::command::parse_command;
 use crate::parser::event::parse_event;
 use crate::parser::member::parse_member;
 use crate::parser::utils::camel_case as parse_component_name;
+use crate::parser::utils::parse_comments;
 use crate::parser::utils::parse_usize;
 
 enum ComponentProperty {
@@ -37,6 +38,7 @@ struct ComponentBuilder {
     pub members: Vec<Member>,
     pub commands: Vec<Command>,
     pub events: Vec<Event>,
+    pub comments: Vec<String>,
 }
 
 impl ComponentBuilder {
@@ -55,6 +57,11 @@ impl ComponentBuilder {
         self
     }
 
+    pub fn with_comments(mut self, comments: Vec<String>) -> Self {
+        self.comments = comments;
+        self
+    }
+
     pub fn build(self) -> Result<Component, &'static str> {
         let name = self.name.ok_or("Name could not be found")?;
         let id = self.id.ok_or("ID could not be found")?;
@@ -64,6 +71,7 @@ impl ComponentBuilder {
             members: self.members,
             commands: self.commands,
             events: self.events,
+            comments: self.comments,
         })
     }
 }
@@ -105,9 +113,10 @@ named!(
 named!(
     pub parse_component<Component>,
     map_res!(do_parse!(
+        comments: parse_comments >>
         complete!(tag!("component"))
             >> name: delimited!(multispace1, parse_component_name, multispace1)
             >> properties: parse_component_body
-            >> (properties.into_iter().fold(ComponentBuilder::default(), |acc, val| acc.with_property(val)).with_name(name))
+            >> (properties.into_iter().fold(ComponentBuilder::default(), |acc, val| acc.with_property(val)).with_name(name).with_comments(comments))
     ), |builder: ComponentBuilder| builder.build())
 );

@@ -2,11 +2,22 @@
 pub struct Value {
     pub name: String,
     pub id: usize,
+    pub comments: Vec<String>,
 }
 
 impl Value {
     pub fn generate_one(&self) -> String {
-        format!("    {},", self.name)
+        format!(
+            "{}    {},",
+            self.comments.iter().fold(String::new(), |acc, val| {
+                if !acc.is_empty() {
+                    acc + &format!("    #[doc = \"{}\"]\n", val)
+                } else {
+                    format!("    #[doc = \"{}\"]\n", val)
+                }
+            }),
+            self.name
+        )
     }
 
     pub fn generate_multiple(data: &[Self]) -> String {

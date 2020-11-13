@@ -15,6 +15,7 @@ use nom::tuple;
 
 use crate::parser::member::parse_member;
 use crate::parser::utils::camel_case as parse_type_name;
+use crate::parser::utils::parse_comments;
 
 named!(
     parse_members<Vec<Member>>,
@@ -36,9 +37,10 @@ named!(
 named!(
     pub parse_type<Type>,
     do_parse!(
+        comments: parse_comments >>
         complete!(tag!("type"))
             >> name: delimited!(multispace1, parse_type_name, multispace1)
             >> members: parse_type_body
-            >> (Type { name, members })
+            >> (Type { name, members, comments })
     )
 );

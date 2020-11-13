@@ -5,12 +5,20 @@ use std::convert::identity;
 pub struct Enum {
     pub name: String,
     pub values: Vec<Value>,
+    pub comments: Vec<String>,
 }
 
 impl Enum {
     pub fn generate_one(&self) -> String {
         format!(
-            "{}\nenum {} {{{}}}\n",
+            "{}{}\nenum {} {{{}}}\n",
+            self.comments.iter().fold(String::new(), |acc, val| {
+                if !acc.is_empty() {
+                    acc + &format!("#[doc = \"{}\"]\n", val)
+                } else {
+                    format!("#[doc = \"{}\"]\n", val)
+                }
+            }),
             "#[spatial_enum]",
             self.name,
             Value::generate_multiple(&self.values)

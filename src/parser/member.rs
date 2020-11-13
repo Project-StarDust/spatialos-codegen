@@ -9,6 +9,7 @@ use nom::named;
 use nom::tag;
 
 use crate::parser::data_type::parse_type;
+use crate::parser::utils::parse_comments;
 use crate::parser::utils::snake_case as parse_member_name;
 
 named!(
@@ -24,9 +25,10 @@ named!(
 named!(
     pub parse_member<Member>,
     do_parse!(
+        comments: parse_comments >>
         type_name: parse_member_type_name
             >> delimited!(multispace0, tag!("="), multispace0)
             >> id: parse_usize
-            >> (Member { m_type: type_name.0, name: type_name.1, id })
+            >> (Member { m_type: type_name.0, name: type_name.1, id, comments })
     )
 );
