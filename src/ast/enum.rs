@@ -19,7 +19,7 @@ impl Enum {
                     format!("#[doc = \"{}\"]\n", val)
                 }
             }),
-            "#[spatial_enum]",
+            "#[derive(SpatialEnum)]",
             self.name,
             Value::generate_multiple(&self.values)
         )
