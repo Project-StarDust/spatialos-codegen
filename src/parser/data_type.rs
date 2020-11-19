@@ -114,7 +114,7 @@ named!(
 mod tests {
 
     use super::*;
-    use nom::{error::ErrorKind, Err::Error};
+    use nom::{error::Error, error::ErrorKind, Err};
 
     #[test]
     fn test_parse_primitive() {
@@ -188,7 +188,10 @@ mod tests {
         );
         assert_eq!(
             parse_primitive(b"CustomComponent"),
-            Err(Error(("CustomComponent".as_bytes(), ErrorKind::Alt)))
+            Err(Err::Error(Error::new(
+                &b"CustomComponent"[..],
+                ErrorKind::Alt
+            )))
         );
     }
 
@@ -234,8 +237,11 @@ mod tests {
             ))
         );
         assert_eq!(
-            parse_type(b"customComponent"),
-            Err(Error(("customComponent".as_bytes(), ErrorKind::Alt)))
+            parse_primitive(b"customComponent"),
+            Err(Err::Error(Error::new(
+                &b"customComponent"[..],
+                ErrorKind::Alt
+            )))
         );
     }
 }

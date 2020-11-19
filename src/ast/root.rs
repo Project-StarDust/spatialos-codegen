@@ -17,7 +17,7 @@ impl ASTBuilder {
         self.directories
             .into_iter()
             .map(|d| {
-                WalkDir::new(d)
+                WalkDir::new(&d)
                     .follow_links(true)
                     .into_iter()
                     .filter_map(|e| e.ok())
@@ -30,11 +30,11 @@ impl ASTBuilder {
                     .filter_map(Result::ok)
                     .map(PathBuf::from)
                     .filter(|p| p.extension() == Some(OsStr::new("schema")))
-                    .map(SchemaFile::try_from)
-                    .map(|schemas| match schemas {
+                    .map(|p| (SchemaFile::try_from(p.clone()), p))
+                    .map(|(schemas, buf)| match schemas {
                         Ok(data) => Ok(data),
                         Err(e) => {
-                            eprintln!("{}", e);
+                            eprintln!("{}: {:?}", e, buf);
                             Err(())
                         }
                     })

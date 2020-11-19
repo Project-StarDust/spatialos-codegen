@@ -6,7 +6,7 @@ use nom::character::complete::multispace1;
 use nom::delimited;
 use nom::do_parse;
 use nom::named;
-use nom::separated_list;
+use nom::separated_list1;
 use nom::tag;
 
 use crate::parser::data_type::parse_type;
@@ -18,7 +18,7 @@ named!(
         char!('('),
         delimited!(
             multispace0,
-            separated_list!(delimited!(multispace0, char!(','), multispace0), parse_type),
+            separated_list1!(delimited!(multispace0, char!(','), multispace0), parse_type),
             multispace0
         ),
         char!(')')

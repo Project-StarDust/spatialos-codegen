@@ -11,7 +11,7 @@ use nom::delimited;
 use nom::do_parse;
 use nom::map_res;
 use nom::named;
-use nom::separated_list;
+use nom::separated_list1;
 use nom::tag;
 
 use nom::terminated;
@@ -95,7 +95,7 @@ named!(
 
 named!(
     parse_properties<Vec<ComponentProperty>>,
-    separated_list!(
+    separated_list1!(
         multispace0,
         terminated!(parse_property, tuple!(multispace0, char!(';')))
     )

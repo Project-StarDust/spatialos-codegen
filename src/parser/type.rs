@@ -7,7 +7,7 @@ use nom::complete;
 use nom::delimited;
 use nom::do_parse;
 use nom::named;
-use nom::separated_list;
+use nom::separated_list1;
 use nom::tag;
 
 use nom::terminated;
@@ -19,7 +19,7 @@ use crate::parser::utils::parse_comments;
 
 named!(
     parse_members<Vec<Member>>,
-    separated_list!(
+    separated_list1!(
         multispace0,
         terminated!(parse_member, tuple!(multispace0, char!(';')))
     )

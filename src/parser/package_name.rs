@@ -5,19 +5,23 @@ use nom::character::complete::multispace1;
 use nom::delimited;
 
 use nom::named;
-use nom::separated_list;
+use nom::separated_list1;
 use nom::tag;
 
 use nom::tuple;
+use nom::complete;
 
 use crate::parser::utils::snake_case;
 use nom::bytes::complete::tag as tag_complete;
+use nom::tap;
 
 named!(
     pub parse_package_components<Vec<String>>,
-    separated_list!(
-        tag_complete("."),
-        snake_case
+    complete!(
+        separated_list1!(
+            tap!(res: char!('.') => { println!("{:?}", res) }),
+            tap!(res: snake_case => { println!("{:?}", res) })
+        )
     )
 );
 
@@ -40,6 +44,7 @@ named!(
 mod tests {
 
     use super::*;
+    
 
     #[test]
     fn test_parse_package_components() {
