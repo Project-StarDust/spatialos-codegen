@@ -47,6 +47,7 @@ mod tests {
     
 
     #[test]
+    #[cfg(not(tarpaulin))]
     fn test_parse_package_components() {
         assert_eq!(
             parse_package_components(b"io.nebulis"),
