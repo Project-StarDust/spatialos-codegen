@@ -8,11 +8,10 @@ use nom::named;
 use nom::separated_list1;
 use nom::tag;
 
-use nom::tuple;
 use nom::complete;
+use nom::tuple;
 
 use crate::parser::utils::snake_case;
-use nom::bytes::complete::tag as tag_complete;
 use nom::tap;
 
 named!(
@@ -49,7 +48,7 @@ mod tests {
     fn test_parse_package_name() {
         assert_eq!(
             parse_package_name(b"package io.nebulis;"),
-            Ok(("".as_bytes(), vec!["io".to_string(), "nebulis".to_string()]))
+            Ok((&b""[..], vec!["io".to_string(), "nebulis".to_string()]))
         )
     }
 }

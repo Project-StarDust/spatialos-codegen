@@ -76,8 +76,6 @@ named!(
     many0!(delimited!(multispace0, parse_model, multispace0))
 );
 
-use nom::tap;
-
 named!(
     pub parse_schema<SchemaFileBuilder>,
     do_parse!(

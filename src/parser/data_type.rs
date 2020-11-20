@@ -118,74 +118,38 @@ mod tests {
 
     #[test]
     fn test_parse_primitive() {
-        assert_eq!(
-            parse_primitive(b"bool"),
-            Ok(("".as_bytes(), DataType::Bool))
-        );
-        assert_eq!(
-            parse_primitive(b"uint32"),
-            Ok(("".as_bytes(), DataType::Uint32))
-        );
-        assert_eq!(
-            parse_primitive(b"uint64"),
-            Ok(("".as_bytes(), DataType::Uint64))
-        );
-        assert_eq!(
-            parse_primitive(b"int32"),
-            Ok(("".as_bytes(), DataType::Int32))
-        );
-        assert_eq!(
-            parse_primitive(b"int64"),
-            Ok(("".as_bytes(), DataType::Int64))
-        );
-        assert_eq!(
-            parse_primitive(b"sint32"),
-            Ok(("".as_bytes(), DataType::SInt32))
-        );
-        assert_eq!(
-            parse_primitive(b"sint64"),
-            Ok(("".as_bytes(), DataType::SInt64))
-        );
+        assert_eq!(parse_primitive(b"bool"), Ok((&b""[..], DataType::Bool)));
+        assert_eq!(parse_primitive(b"uint32"), Ok((&b""[..], DataType::Uint32)));
+        assert_eq!(parse_primitive(b"uint64"), Ok((&b""[..], DataType::Uint64)));
+        assert_eq!(parse_primitive(b"int32"), Ok((&b""[..], DataType::Int32)));
+        assert_eq!(parse_primitive(b"int64"), Ok((&b""[..], DataType::Int64)));
+        assert_eq!(parse_primitive(b"sint32"), Ok((&b""[..], DataType::SInt32)));
+        assert_eq!(parse_primitive(b"sint64"), Ok((&b""[..], DataType::SInt64)));
         assert_eq!(
             parse_primitive(b"fixed32"),
-            Ok(("".as_bytes(), DataType::Fixed32))
+            Ok((&b""[..], DataType::Fixed32))
         );
         assert_eq!(
             parse_primitive(b"fixed64"),
-            Ok(("".as_bytes(), DataType::Fixed64))
+            Ok((&b""[..], DataType::Fixed64))
         );
         assert_eq!(
             parse_primitive(b"sfixed32"),
-            Ok(("".as_bytes(), DataType::SFixed32))
+            Ok((&b""[..], DataType::SFixed32))
         );
         assert_eq!(
             parse_primitive(b"sfixed64"),
-            Ok(("".as_bytes(), DataType::SFixed64))
+            Ok((&b""[..], DataType::SFixed64))
         );
-        assert_eq!(
-            parse_primitive(b"float"),
-            Ok(("".as_bytes(), DataType::Float))
-        );
-        assert_eq!(
-            parse_primitive(b"double"),
-            Ok(("".as_bytes(), DataType::Double))
-        );
-        assert_eq!(
-            parse_primitive(b"string"),
-            Ok(("".as_bytes(), DataType::String))
-        );
-        assert_eq!(
-            parse_primitive(b"bytes"),
-            Ok(("".as_bytes(), DataType::Bytes))
-        );
+        assert_eq!(parse_primitive(b"float"), Ok((&b""[..], DataType::Float)));
+        assert_eq!(parse_primitive(b"double"), Ok((&b""[..], DataType::Double)));
+        assert_eq!(parse_primitive(b"string"), Ok((&b""[..], DataType::String)));
+        assert_eq!(parse_primitive(b"bytes"), Ok((&b""[..], DataType::Bytes)));
         assert_eq!(
             parse_primitive(b"EntityId"),
-            Ok(("".as_bytes(), DataType::EntityID))
+            Ok((&b""[..], DataType::EntityID))
         );
-        assert_eq!(
-            parse_primitive(b"Entity"),
-            Ok(("".as_bytes(), DataType::Entity))
-        );
+        assert_eq!(parse_primitive(b"Entity"), Ok((&b""[..], DataType::Entity)));
         assert_eq!(
             parse_primitive(b"CustomComponent"),
             Err(Err::Error(Error::new(
@@ -197,42 +161,27 @@ mod tests {
 
     #[test]
     fn test_parse_type() {
-        assert_eq!(parse_type(b"bool"), Ok(("".as_bytes(), DataType::Bool)));
-        assert_eq!(parse_type(b"uint32"), Ok(("".as_bytes(), DataType::Uint32)));
-        assert_eq!(parse_type(b"uint64"), Ok(("".as_bytes(), DataType::Uint64)));
-        assert_eq!(parse_type(b"int32"), Ok(("".as_bytes(), DataType::Int32)));
-        assert_eq!(parse_type(b"int64"), Ok(("".as_bytes(), DataType::Int64)));
-        assert_eq!(parse_type(b"sint32"), Ok(("".as_bytes(), DataType::SInt32)));
-        assert_eq!(parse_type(b"sint64"), Ok(("".as_bytes(), DataType::SInt64)));
-        assert_eq!(
-            parse_type(b"fixed32"),
-            Ok(("".as_bytes(), DataType::Fixed32))
-        );
-        assert_eq!(
-            parse_type(b"fixed64"),
-            Ok(("".as_bytes(), DataType::Fixed64))
-        );
-        assert_eq!(
-            parse_type(b"sfixed32"),
-            Ok(("".as_bytes(), DataType::SFixed32))
-        );
-        assert_eq!(
-            parse_type(b"sfixed64"),
-            Ok(("".as_bytes(), DataType::SFixed64))
-        );
-        assert_eq!(parse_type(b"float"), Ok(("".as_bytes(), DataType::Float)));
-        assert_eq!(parse_type(b"double"), Ok(("".as_bytes(), DataType::Double)));
-        assert_eq!(parse_type(b"string"), Ok(("".as_bytes(), DataType::String)));
-        assert_eq!(parse_type(b"bytes"), Ok(("".as_bytes(), DataType::Bytes)));
-        assert_eq!(
-            parse_type(b"EntityId"),
-            Ok(("".as_bytes(), DataType::EntityID))
-        );
-        assert_eq!(parse_type(b"Entity"), Ok(("".as_bytes(), DataType::Entity)));
+        assert_eq!(parse_type(b"bool"), Ok((&b""[..], DataType::Bool)));
+        assert_eq!(parse_type(b"uint32"), Ok((&b""[..], DataType::Uint32)));
+        assert_eq!(parse_type(b"uint64"), Ok((&b""[..], DataType::Uint64)));
+        assert_eq!(parse_type(b"int32"), Ok((&b""[..], DataType::Int32)));
+        assert_eq!(parse_type(b"int64"), Ok((&b""[..], DataType::Int64)));
+        assert_eq!(parse_type(b"sint32"), Ok((&b""[..], DataType::SInt32)));
+        assert_eq!(parse_type(b"sint64"), Ok((&b""[..], DataType::SInt64)));
+        assert_eq!(parse_type(b"fixed32"), Ok((&b""[..], DataType::Fixed32)));
+        assert_eq!(parse_type(b"fixed64"), Ok((&b""[..], DataType::Fixed64)));
+        assert_eq!(parse_type(b"sfixed32"), Ok((&b""[..], DataType::SFixed32)));
+        assert_eq!(parse_type(b"sfixed64"), Ok((&b""[..], DataType::SFixed64)));
+        assert_eq!(parse_type(b"float"), Ok((&b""[..], DataType::Float)));
+        assert_eq!(parse_type(b"double"), Ok((&b""[..], DataType::Double)));
+        assert_eq!(parse_type(b"string"), Ok((&b""[..], DataType::String)));
+        assert_eq!(parse_type(b"bytes"), Ok((&b""[..], DataType::Bytes)));
+        assert_eq!(parse_type(b"EntityId"), Ok((&b""[..], DataType::EntityID)));
+        assert_eq!(parse_type(b"Entity"), Ok((&b""[..], DataType::Entity)));
         assert_eq!(
             parse_type(b"CustomComponent"),
             Ok((
-                "".as_bytes(),
+                &b""[..],
                 DataType::UserDefined("CustomComponent".to_string())
             ))
         );

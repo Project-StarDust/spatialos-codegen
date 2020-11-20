@@ -1,6 +1,6 @@
 use spatialos_codegen::ASTBuilder;
 
-fn main() -> () {
+fn main() {
     let schema = ASTBuilder::default()
         .with_directory("./examples/schema_old")
         .build();

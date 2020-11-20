@@ -17,7 +17,7 @@ impl Component {
     pub fn generate_one(&self) -> String {
         format!(
             "{}\n{}{}\n{}\npub struct {} {{{}}}",
-            format!("#[allow(dead_code)]"),
+            "#[allow(dead_code)]".to_string(),
             self.comments.iter().fold(String::new(), |acc, val| {
                 if !acc.is_empty() {
                     acc + &format!("#[doc = \"{}\"]\n", val)
@@ -25,7 +25,7 @@ impl Component {
                     format!("#[doc = \"{}\"]\n", val)
                 }
             }),
-            format!("#[derive(SpatialComponent)]"),
+            "#[derive(SpatialComponent)]".to_string(),
             format!("#[id({})]", self.id),
             self.name,
             Member::generate_multiple(&self.members)

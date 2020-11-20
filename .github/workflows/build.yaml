@@ -30,6 +30,9 @@ jobs:
       - name: Install clippy
         run: rustup component add clippy --toolchain=${{ matrix.version }} || cargo install --git https://github.com/rust-lang/rust-clippy/ --force clippy
 
+      - name: check formatting
+        run: cargo fmt -- --check
+
       - name: clean
         run: cargo clean
 
@@ -42,9 +45,9 @@ jobs:
         run: cargo test -- --test-threads 1
         env:
           RUST_BACKTRACE: 1
-
-      - name: check formatting
-        run: cargo fmt -- --check
+      
+      - name: clippy
+        run: cargo clippy --all-targets --all-features -- -D warnings
 
 
   build-windows:
@@ -73,6 +76,9 @@ jobs:
       - name: Install clippy
         run: rustup component add clippy --toolchain=${{ matrix.version }} || cargo install --git https://github.com/rust-lang/rust-clippy/ --force clippy
 
+      - name: check formatting
+        run: cargo fmt -- --check
+
       - name: clean
         run: cargo clean
 
@@ -86,8 +92,9 @@ jobs:
         env:
           RUST_BACKTRACE: 1
 
-      - name: check formatting
-        run: cargo fmt -- --check
+      - name: clippy
+        run: cargo clippy --all-targets --all-features -- -D warnings
+
 
   build-macos:
 
@@ -118,6 +125,9 @@ jobs:
       - name: Install clippy
         run: rustup component add clippy --toolchain=${{ matrix.version }} || cargo install --git https://github.com/rust-lang/rust-clippy/ --force clippy
 
+      - name: check formatting
+        run: cargo fmt -- --check
+
       - name: clean
         run: cargo clean
 
@@ -131,6 +141,5 @@ jobs:
         env:
           RUST_BACKTRACE: 1
 
-
-      - name: check formatting
-        run: cargo fmt -- --check
+      - name: clippy
+        run: cargo clippy --all-targets --all-features -- -D warnings

@@ -16,6 +16,7 @@ pub fn uppercase(input: &[u8]) -> IResult<&[u8], char> {
     one_of("ABCDEFGHIJKLMNOPQRSTUVWXYZ")(input)
 }
 
+#[allow(dead_code)]
 pub fn lowercase(input: &[u8]) -> IResult<&[u8], char> {
     one_of("abcdefghijklmnopqrstuvwxyz")(input)
 }
@@ -111,14 +112,14 @@ mod tests {
     fn test_camel_case_component() {
         assert_eq!(
             camel_case_component(b"CamelCase"),
-            Ok(("Case".as_bytes(), "Camel".to_string()))
+            Ok((&b"Case"[..], "Camel".to_string()))
         )
     }
     #[test]
     fn test_camel_case_component_end() {
         assert_eq!(
             camel_case_component(b"Camel"),
-            Ok(("".as_bytes(), "Camel".to_string()))
+            Ok((&b""[..], "Camel".to_string()))
         )
     }
 }
