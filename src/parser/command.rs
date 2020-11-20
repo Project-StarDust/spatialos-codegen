@@ -1,33 +1,41 @@
-use crate::ast::Command;
-use crate::ast::DataType;
-use nom::char;
-use nom::character::complete::multispace0;
-use nom::character::complete::multispace1;
-use nom::delimited;
-use nom::do_parse;
-use nom::named;
-use nom::separated_list1;
-use nom::tag;
+use crate::{
+    ast::{Command, DataType},
+    parser::{
+        data_type::parse_type,
+        utils::{snake_case as parse_command_name, ws0},
+    },
+};
 
-use crate::parser::data_type::parse_type;
-use crate::parser::utils::snake_case as parse_command_name;
+use nom::{
+    bytes::complete::tag,
+    character::complete::multispace1,
+    character::complete::{char, multispace0},
+    combinator::map,
+    multi::separated_list1,
+    sequence::delimited,
+    sequence::{preceded, tuple},
+    IResult,
+};
 
-named!(
-    parse_args<Vec<DataType>>,
-    delimited!(
-        char!('('),
-        delimited!(
-            multispace0,
-            separated_list1!(delimited!(multispace0, char!(','), multispace0), parse_type),
-            multispace0
-        ),
-        char!(')')
-    )
-);
+pub fn parse_args(input: &[u8]) -> IResult<&[u8], Vec<DataType>> {
+    delimited(
+        char('('),
+        ws0(separated_list1(ws0(char(',')), parse_type)),
+        char(')'),
+    )(input)
+}
 
-named!(
-    pub parse_command<Command>,
-    do_parse!(
-        tag!("command") >> multispace1 >> r_type: parse_type >> multispace1 >> name: parse_command_name >> multispace0 >> args: parse_args >> (Command { r_type, name, args })
-    )
-);
+pub fn parse_command(input: &[u8]) -> IResult<&[u8], Command> {
+    map(
+        tuple((
+            preceded(tag("command"), preceded(multispace1, parse_type)),
+            preceded(multispace1, parse_command_name),
+            preceded(multispace0, parse_args),
+        )),
+        |(ty, name, args)| Command {
+            r_type: ty,
+            name,
+            args,
+        },
+    )(input)
+}

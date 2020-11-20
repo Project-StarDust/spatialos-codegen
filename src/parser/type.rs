@@ -1,46 +1,42 @@
-use crate::ast::Member;
-use crate::ast::Type;
-use nom::char;
-use nom::character::complete::multispace0;
-use nom::character::complete::multispace1;
-use nom::complete;
-use nom::delimited;
-use nom::do_parse;
-use nom::named;
-use nom::separated_list1;
-use nom::tag;
+use crate::{
+    ast::{Member, Type},
+    parser::{
+        member::parse_member,
+        utils::{camel_case as parse_type_name, parse_comments, ws0, ws1},
+    },
+};
 
-use nom::terminated;
-use nom::tuple;
+use nom::{
+    bytes::complete::tag,
+    character::complete::{char, multispace0},
+    combinator::map,
+    multi::separated_list1,
+    sequence::{delimited, pair, preceded, terminated, tuple},
+    IResult,
+};
 
-use crate::parser::member::parse_member;
-use crate::parser::utils::camel_case as parse_type_name;
-use crate::parser::utils::parse_comments;
-
-named!(
-    parse_members<Vec<Member>>,
-    separated_list1!(
+fn parse_members(input: &[u8]) -> IResult<&[u8], Vec<Member>> {
+    separated_list1(
         multispace0,
-        terminated!(parse_member, tuple!(multispace0, char!(';')))
-    )
-);
+        terminated(parse_member, pair(multispace0, char(';'))),
+    )(input)
+}
 
-named!(
-    parse_type_body<Vec<Member>>,
-    delimited!(
-        char!('{'),
-        delimited!(multispace0, parse_members, multispace0),
-        char!('}')
-    )
-);
+fn parse_type_body(input: &[u8]) -> IResult<&[u8], Vec<Member>> {
+    delimited(char('{'), ws0(parse_members), char('}'))(input)
+}
 
-named!(
-    pub parse_type<Type>,
-    do_parse!(
-        comments: parse_comments >>
-        complete!(tag!("type"))
-            >> name: delimited!(multispace1, parse_type_name, multispace1)
-            >> members: parse_type_body
-            >> (Type { name, members, comments })
-    )
-);
+pub fn parse_type(input: &[u8]) -> IResult<&[u8], Type> {
+    map(
+        tuple((
+            parse_comments,
+            preceded(tag("type"), ws1(parse_type_name)),
+            parse_type_body,
+        )),
+        |(comments, name, members)| Type {
+            name,
+            members,
+            comments,
+        },
+    )(input)
+}

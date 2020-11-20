@@ -1,16 +1,37 @@
 use std::convert::identity;
 
-use nom::character::{complete::multispace0, is_digit};
-use nom::combinator::map;
-use nom::combinator::peek;
-use nom::combinator::value;
-use nom::multi::fold_many1;
-use nom::multi::many0;
-use nom::sequence::pair;
-use nom::IResult;
-use nom::{branch::alt, bytes::complete::is_not, bytes::complete::tag, sequence::delimited};
-use nom::{bytes::complete::take_while1, character::complete::char, combinator::map_res};
-use nom::{character::complete::one_of, combinator::map_opt, multi::separated_list1};
+use nom::{
+    branch::alt,
+    bytes::complete::take_while1,
+    bytes::complete::{is_not, tag},
+    character::{
+        complete::{char, multispace0, multispace1, one_of},
+        is_digit,
+    },
+    combinator::{map, map_opt, map_res, peek, value},
+    error::ParseError,
+    multi::{fold_many1, many0, separated_list1},
+    sequence::{delimited, pair},
+    IResult,
+};
+
+pub fn ws0<'a, F: 'a, O, E: ParseError<&'a [u8]>>(
+    inner: F,
+) -> impl FnMut(&'a [u8]) -> IResult<&'a [u8], O, E>
+where
+    F: FnMut(&'a [u8]) -> IResult<&'a [u8], O, E>,
+{
+    delimited(multispace0, inner, multispace0)
+}
+
+pub fn ws1<'a, F: 'a, O, E: ParseError<&'a [u8]>>(
+    inner: F,
+) -> impl FnMut(&'a [u8]) -> IResult<&'a [u8], O, E>
+where
+    F: FnMut(&'a [u8]) -> IResult<&'a [u8], O, E>,
+{
+    delimited(multispace1, inner, multispace1)
+}
 
 pub fn uppercase(input: &[u8]) -> IResult<&[u8], char> {
     one_of("ABCDEFGHIJKLMNOPQRSTUVWXYZ")(input)

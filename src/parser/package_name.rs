@@ -1,43 +1,24 @@
-use nom::char;
-use nom::character::complete::multispace0;
-use nom::character::complete::multispace1;
-
-use nom::delimited;
-
-use nom::named;
-use nom::separated_list1;
-use nom::tag;
-
-use nom::complete;
-use nom::tuple;
+use nom::{
+    bytes::complete::tag,
+    character::complete::{char, multispace0, multispace1},
+    multi::separated_list1,
+    sequence::{delimited, pair},
+    IResult,
+};
 
 use crate::parser::utils::snake_case;
-use nom::tap;
 
-named!(
-    pub parse_package_components<Vec<String>>,
-    complete!(
-        separated_list1!(
-            tap!(res: char!('.') => { println!("{:?}", res) }),
-            tap!(res: snake_case => { println!("{:?}", res) })
-        )
-    )
-);
+pub fn parse_package_components(input: &[u8]) -> IResult<&[u8], Vec<String>> {
+    separated_list1(char('.'), snake_case)(input)
+}
 
-named!(
-    pub parse_package_name<Vec<String>>,
-    delimited!(
-        tuple!(
-            tag!("package"),
-            multispace1
-        ),
+pub fn parse_package_name(input: &[u8]) -> IResult<&[u8], Vec<String>> {
+    delimited(
+        pair(tag("package"), multispace1),
         parse_package_components,
-        tuple!(
-            multispace0,
-            char!(';')
-        )
-    )
-);
+        pair(multispace0, char(';')),
+    )(input)
+}
 
 #[cfg(test)]
 mod tests {

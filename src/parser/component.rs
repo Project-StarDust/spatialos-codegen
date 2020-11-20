@@ -1,28 +1,23 @@
-use crate::ast::Command;
-use crate::ast::Component;
-use crate::ast::Event;
-use crate::ast::Member;
-use nom::alt;
-use nom::char;
-use nom::character::complete::multispace0;
-use nom::character::complete::multispace1;
-use nom::complete;
-use nom::delimited;
-use nom::do_parse;
-use nom::map_res;
-use nom::named;
-use nom::separated_list1;
-use nom::tag;
+use crate::{
+    ast::{Command, Component, Event, Member},
+    parser::{
+        command::parse_command,
+        event::parse_event,
+        member::parse_member,
+        utils::camel_case as parse_component_name,
+        utils::{parse_comments, parse_usize, ws0, ws1},
+    },
+};
 
-use nom::terminated;
-use nom::tuple;
-
-use crate::parser::command::parse_command;
-use crate::parser::event::parse_event;
-use crate::parser::member::parse_member;
-use crate::parser::utils::camel_case as parse_component_name;
-use crate::parser::utils::parse_comments;
-use crate::parser::utils::parse_usize;
+use nom::{
+    branch::alt,
+    bytes::complete::tag,
+    character::complete::{char, multispace0},
+    combinator::{map, map_res},
+    multi::separated_list1,
+    sequence::{delimited, pair, preceded, terminated, tuple},
+    IResult,
+};
 
 enum ComponentProperty {
     ID(usize),
@@ -76,47 +71,48 @@ impl ComponentBuilder {
     }
 }
 
-named!(
-    parse_id<usize>,
-    do_parse!(
-        tag!("id") >> delimited!(multispace0, tag!("="), multispace0) >> id: parse_usize >> (id)
-    )
-);
+fn parse_id(input: &[u8]) -> IResult<&[u8], usize> {
+    preceded(tag("id"), preceded(ws0(char('=')), parse_usize))(input)
+}
 
-named!(
-    parse_property<ComponentProperty>,
-    alt!(
-        parse_id => { |i| ComponentProperty::ID(i) }  |
-        parse_member => { |m| ComponentProperty::Member(m) } |
-        parse_command => { |c| ComponentProperty::Command(c) } |
-        parse_event => { |e| ComponentProperty::Event(e) }
-    )
-);
+fn parse_property(input: &[u8]) -> IResult<&[u8], ComponentProperty> {
+    alt((
+        map(parse_id, ComponentProperty::ID),
+        map(parse_member, ComponentProperty::Member),
+        map(parse_command, ComponentProperty::Command),
+        map(parse_event, ComponentProperty::Event),
+    ))(input)
+}
 
-named!(
-    parse_properties<Vec<ComponentProperty>>,
-    separated_list1!(
+fn parse_properties(input: &[u8]) -> IResult<&[u8], Vec<ComponentProperty>> {
+    separated_list1(
         multispace0,
-        terminated!(parse_property, tuple!(multispace0, char!(';')))
-    )
-);
+        terminated(parse_property, pair(multispace0, char(';'))),
+    )(input)
+}
 
-named!(
-    parse_component_body<Vec<ComponentProperty>>,
-    delimited!(
-        char!('{'),
-        delimited!(multispace0, parse_properties, multispace0),
-        char!('}')
-    )
-);
+fn parse_component_body(input: &[u8]) -> IResult<&[u8], Vec<ComponentProperty>> {
+    delimited(char('{'), ws0(parse_properties), char('}'))(input)
+}
 
-named!(
-    pub parse_component<Component>,
-    map_res!(do_parse!(
-        comments: parse_comments >>
-        complete!(tag!("component"))
-            >> name: delimited!(multispace1, parse_component_name, multispace1)
-            >> properties: parse_component_body
-            >> (properties.into_iter().fold(ComponentBuilder::default(), |acc, val| acc.with_property(val)).with_name(name).with_comments(comments))
-    ), |builder: ComponentBuilder| builder.build())
-);
+pub fn parse_component(input: &[u8]) -> IResult<&[u8], Component> {
+    map_res(
+        map(
+            tuple((
+                parse_comments,
+                preceded(tag("component"), ws1(parse_component_name)),
+                parse_component_body,
+            )),
+            |(comments, name, properties)| {
+                properties
+                    .into_iter()
+                    .fold(ComponentBuilder::default(), |acc, val| {
+                        acc.with_property(val)
+                    })
+                    .with_name(name)
+                    .with_comments(comments)
+            },
+        ),
+        |builder| builder.build(),
+    )(input)
+}

@@ -1,37 +1,31 @@
-use crate::ast::DataType;
-use nom::sequence::delimited;
-use nom::sequence::pair;
+use crate::{
+    ast::DataType,
+    parser::utils::{uppercase, ws0},
+};
 use nom::{
     branch::alt,
-    combinator::{map, map_res},
+    bytes::complete::tag,
+    bytes::complete::take_while,
+    character::complete::char,
+    character::is_alphabetic,
+    combinator::{map, map_res, value},
+    sequence::separated_pair,
+    sequence::{delimited, pair},
+    IResult,
 };
-use nom::{bytes::complete::tag, character::is_alphabetic};
-use nom::{bytes::complete::take_while, IResult};
-use nom::{character::complete::char, sequence::separated_pair};
-use nom::{character::complete::multispace0, combinator::value};
-
-use super::utils::uppercase;
 
 pub fn parse_one_generic(input: &[u8]) -> IResult<&[u8], DataType> {
-    delimited(
-        char('<'),
-        delimited(multispace0, parse_type_without_generics, multispace0),
-        char('>'),
-    )(input)
+    delimited(char('<'), ws0(parse_type_without_generics), char('>'))(input)
 }
 
 pub fn parse_two_generics(input: &[u8]) -> IResult<&[u8], (DataType, DataType)> {
     delimited(
         char('<'),
-        delimited(
-            multispace0,
-            separated_pair(
-                parse_type_without_generics,
-                delimited(multispace0, char(','), multispace0),
-                parse_type_without_generics,
-            ),
-            multispace0,
-        ),
+        ws0(separated_pair(
+            parse_type_without_generics,
+            ws0(char(',')),
+            parse_type_without_generics,
+        )),
         char('>'),
     )(input)
 }

@@ -1,15 +1,21 @@
-use crate::ast::Event;
-use nom::character::complete::multispace1;
-use nom::do_parse;
-use nom::named;
-use nom::tag;
+use crate::{
+    ast::Event,
+    parser::{
+        data_type::parse_type,
+        utils::{snake_case as parse_event_name, ws1},
+    },
+};
 
-use crate::parser::data_type::parse_type;
-use crate::parser::utils::snake_case as parse_event_name;
+use nom::{
+    bytes::complete::tag,
+    combinator::map,
+    sequence::{pair, preceded},
+    IResult,
+};
 
-named!(
-    pub parse_event<Event>,
-    do_parse!(
-        tag!("event") >> multispace1 >> r_type: parse_type >> multispace1 >> name: parse_event_name >> (Event { r_type, name })
-    )
-);
+pub fn parse_event(input: &[u8]) -> IResult<&[u8], Event> {
+    map(
+        pair(preceded(tag("event"), ws1(parse_type)), parse_event_name),
+        |(ty, name)| Event { r_type: ty, name },
+    )(input)
+}

@@ -1,21 +1,21 @@
-use crate::ast::Value;
-use crate::parser::utils::parse_usize;
-use nom::character::complete::multispace0;
-use nom::delimited;
-use nom::do_parse;
-use nom::named;
-use nom::tag;
+use crate::{
+    ast::Value,
+    parser::utils::{parse_comments, parse_usize, upper_snake_case as parse_value_name, ws0},
+};
+use nom::{
+    character::complete::char,
+    combinator::map,
+    sequence::{preceded, tuple},
+    IResult,
+};
 
-use crate::parser::utils::parse_comments;
-use crate::parser::utils::upper_snake_case as parse_value_name;
-
-named!(
-    pub parse_value<Value>,
-    do_parse!(
-        comments: parse_comments >>
-        name: parse_value_name
-            >> delimited!(multispace0, tag!("="), multispace0)
-            >> id: parse_usize
-            >> (Value { name, id, comments })
-    )
-);
+pub fn parse_value(input: &[u8]) -> IResult<&[u8], Value> {
+    map(
+        tuple((
+            parse_comments,
+            parse_value_name,
+            preceded(ws0(char('=')), parse_usize),
+        )),
+        |(comments, name, id)| Value { name, id, comments },
+    )(input)
+}

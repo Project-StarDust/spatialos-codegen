@@ -1,17 +1,12 @@
-use crate::ast::Component;
-use crate::ast::Enum;
-use crate::ast::SchemaFile;
-use crate::ast::Type;
-use crate::parser::component::parse_component;
-use crate::parser::package_name::parse_package_name;
-use crate::parser::r#enum::parse_enum;
-use crate::parser::r#type::parse_type;
-use nom::alt;
-use nom::character::complete::multispace0;
-use nom::delimited;
-use nom::do_parse;
-use nom::many0;
-use nom::named;
+use crate::{
+    ast::{Component, Enum, SchemaFile, Type},
+    parser::{
+        component::parse_component, package_name::parse_package_name, r#enum::parse_enum,
+        r#type::parse_type, utils::ws0,
+    },
+};
+
+use nom::{branch::alt, combinator::map, multi::many0, sequence::pair, IResult};
 
 #[derive(Default)]
 pub struct SchemaFileBuilder {
@@ -62,28 +57,26 @@ impl SchemaFileBuilder {
     }
 }
 
-named!(
-    parse_model<SchemaModel>,
-    alt!(
-        parse_type => { |t| SchemaModel::Type(t) } |
-        parse_component => { |c| SchemaModel::Component(c) } |
-        parse_enum => { |e| SchemaModel::Enum(e) }
-    )
-);
+fn parse_model(input: &[u8]) -> IResult<&[u8], SchemaModel> {
+    alt((
+        map(parse_type, SchemaModel::Type),
+        map(parse_component, SchemaModel::Component),
+        map(parse_enum, SchemaModel::Enum),
+    ))(input)
+}
 
-named!(
-    parse_models<Vec<SchemaModel>>,
-    many0!(delimited!(multispace0, parse_model, multispace0))
-);
+fn parse_models(input: &[u8]) -> IResult<&[u8], Vec<SchemaModel>> {
+    many0(ws0(parse_model))(input)
+}
 
-named!(
-    pub parse_schema<SchemaFileBuilder>,
-    do_parse!(
-        package_name_parts: parse_package_name
-            >> models: delimited!(multispace0, parse_models, multispace0)
-            >> (models
+pub fn parse_schema(input: &[u8]) -> IResult<&[u8], SchemaFileBuilder> {
+    map(
+        pair(parse_package_name, ws0(parse_models)),
+        |(package_name, models)| {
+            models
                 .into_iter()
                 .fold(SchemaFileBuilder::default(), |acc, val| acc.with_model(val))
-                .with_package_name(package_name_parts))
-    )
-);
+                .with_package_name(package_name)
+        },
+    )(input)
+}

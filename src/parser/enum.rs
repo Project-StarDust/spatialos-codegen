@@ -1,46 +1,42 @@
-use crate::ast::Enum;
-use crate::ast::Value;
-use nom::char;
-use nom::character::complete::multispace0;
-use nom::character::complete::multispace1;
-use nom::complete;
-use nom::delimited;
-use nom::do_parse;
-use nom::named;
-use nom::separated_list1;
-use nom::tag;
+use crate::{
+    ast::{Enum, Value},
+    parser::{
+        utils::{camel_case as parse_enum_name, parse_comments, ws0, ws1},
+        value::parse_value,
+    },
+};
+use nom::{
+    bytes::complete::tag,
+    character::complete::{char, multispace0},
+    combinator::map,
+    multi::separated_list1,
+    sequence::delimited,
+    sequence::{preceded, terminated, tuple},
+    IResult,
+};
 
-use nom::terminated;
-use nom::tuple;
-
-use crate::parser::utils::camel_case as parse_enum_name;
-use crate::parser::utils::parse_comments;
-use crate::parser::value::parse_value;
-
-named!(
-    parse_values<Vec<Value>>,
-    separated_list1!(
+fn parse_values(input: &[u8]) -> IResult<&[u8], Vec<Value>> {
+    separated_list1(
         multispace0,
-        terminated!(parse_value, tuple!(multispace0, char!(';')))
-    )
-);
+        terminated(parse_value, tuple((multispace0, char(';')))),
+    )(input)
+}
 
-named!(
-    parse_enum_body<Vec<Value>>,
-    delimited!(
-        char!('{'),
-        delimited!(multispace0, parse_values, multispace0),
-        char!('}')
-    )
-);
+fn parse_enum_body(input: &[u8]) -> IResult<&[u8], Vec<Value>> {
+    delimited(char('{'), ws0(parse_values), char('}'))(input)
+}
 
-named!(
-    pub parse_enum<Enum>,
-    do_parse!(
-        comments: parse_comments >>
-        complete!(tag!("enum"))
-            >> name: delimited!(multispace1, parse_enum_name, multispace1)
-            >> values: parse_enum_body
-            >> (Enum { name, values, comments })
-    )
-);
+pub fn parse_enum(input: &[u8]) -> IResult<&[u8], Enum> {
+    map(
+        tuple((
+            parse_comments,
+            preceded(tag("enum"), ws1(parse_enum_name)),
+            parse_enum_body,
+        )),
+        |(comments, name, values)| Enum {
+            name,
+            values,
+            comments,
+        },
+    )(input)
+}
