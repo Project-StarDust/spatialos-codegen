@@ -1,163 +1,100 @@
 use crate::ast::DataType;
-use nom::alt;
-use nom::bytes::complete::take_while;
-use nom::character::complete::multispace0;
-use nom::character::is_alphabetic;
-use nom::complete;
-use nom::delimited;
-use nom::do_parse;
-use nom::map_res;
-use nom::named;
-use nom::one_of;
-use nom::pair;
-use nom::separated_pair;
-use nom::tag;
+use nom::sequence::delimited;
+use nom::sequence::pair;
+use nom::{
+    branch::alt,
+    combinator::{map, map_res},
+};
+use nom::{bytes::complete::tag, character::is_alphabetic};
+use nom::{bytes::complete::take_while, IResult};
+use nom::{character::complete::char, sequence::separated_pair};
+use nom::{character::complete::multispace0, combinator::value};
 
-named!(
-    pub parse_one_generic<DataType>,
-    delimited!(
-        tag!("<"),
-        delimited!(
-            multispace0,
-            parse_type_without_generics,
-            multispace0
-        ),
-        tag!(">")
-    )
-);
+use super::utils::uppercase;
 
-named!(
-    pub parse_two_generics<(DataType, DataType)>,
-    delimited!(
-        tag!("<"),
-        delimited!(
+pub fn parse_one_generic(input: &[u8]) -> IResult<&[u8], DataType> {
+    delimited(
+        char('<'),
+        delimited(multispace0, parse_type_without_generics, multispace0),
+        char('>'),
+    )(input)
+}
+
+pub fn parse_two_generics(input: &[u8]) -> IResult<&[u8], (DataType, DataType)> {
+    delimited(
+        char('<'),
+        delimited(
             multispace0,
-            separated_pair!(
+            separated_pair(
                 parse_type_without_generics,
-                delimited!(
-                    multispace0,
-                    tag!(","),
-                    multispace0
-                ),
-                parse_type_without_generics
+                delimited(multispace0, char(','), multispace0),
+                parse_type_without_generics,
             ),
-            multispace0
+            multispace0,
         ),
-        tag!(">")
-    )
-);
+        char('>'),
+    )(input)
+}
 
-named!(
-    pub parse_primitive<DataType>,
-    alt!(
-        complete!(tag!("bool"))     => { |_| DataType::Bool }     |
-        complete!(tag!("float"))    => { |_| DataType::Float }    |
-        complete!(tag!("bytes"))    => { |_| DataType::Bytes }    |
-        complete!(tag!("int32"))    => { |_| DataType::Int32 }    |
-        complete!(tag!("int64"))    => { |_| DataType::Int64 }    |
-        complete!(tag!("string"))   => { |_| DataType::String }   |
-        complete!(tag!("double"))   => { |_| DataType::Double }   |
-        complete!(tag!("uint32"))   => { |_| DataType::Uint32 }   |
-        complete!(tag!("uint64"))   => { |_| DataType::Uint64 }   |
-        complete!(tag!("sint32"))   => { |_| DataType::SInt32 }   |
-        complete!(tag!("sint64"))   => { |_| DataType::SInt64 }   |
-        complete!(tag!("fixed32"))  => { |_| DataType::Fixed32 }  |
-        complete!(tag!("fixed64"))  => { |_| DataType::Fixed64 }  |
-        complete!(tag!("sfixed32")) => { |_| DataType::SFixed32 } |
-        complete!(tag!("sfixed64")) => { |_| DataType::SFixed64 } |
-        complete!(tag!("EntityId")) => { |_| DataType::EntityID } |
-        complete!(tag!("Entity"))   => { |_| DataType::Entity }
-    )
-);
+pub fn parse_primitive(input: &[u8]) -> IResult<&[u8], DataType> {
+    alt((
+        value(DataType::Bool, tag("bool")),
+        value(DataType::Float, tag("float")),
+        value(DataType::Bytes, tag("bytes")),
+        value(DataType::Int32, tag("int32")),
+        value(DataType::Int64, tag("int64")),
+        value(DataType::String, tag("string")),
+        value(DataType::Double, tag("double")),
+        value(DataType::Uint32, tag("uint32")),
+        value(DataType::Uint64, tag("uint64")),
+        value(DataType::SInt32, tag("sint32")),
+        value(DataType::SInt64, tag("sint64")),
+        value(DataType::Fixed32, tag("fixed32")),
+        value(DataType::Fixed64, tag("fixed64")),
+        value(DataType::SFixed32, tag("sfixed32")),
+        value(DataType::SFixed64, tag("sfixed64")),
+        value(DataType::EntityID, tag("EntityId")),
+        value(DataType::Entity, tag("Entity")),
+    ))(input)
+}
 
-named!(
-    pub parse_user_type<String>,
-    do_parse!(
-        first_letter: one_of!("ABCDEFGHIJKLMNOPQRSTUVWXYZ")
-            >> rest: map_res!(complete!(take_while(is_alphabetic)), |s| std::str::from_utf8(s))
-            >> (first_letter.to_string() + rest)
-    )
-);
+pub fn parse_user_type(input: &[u8]) -> IResult<&[u8], String> {
+    map(
+        pair(
+            uppercase,
+            map_res(take_while(is_alphabetic), std::str::from_utf8),
+        ),
+        |(first_letter, rest)| first_letter.to_string() + rest,
+    )(input)
+}
 
-named!(
-    pub parse_generic_type<DataType>,
-    alt!(
-        complete!(
-            pair!(tag!("map"), parse_two_generics)
-        ) => {|(_, generics): (_, (DataType, DataType))| DataType::Map(Box::new(generics.0), Box::new(generics.1)) } |
-        complete!(
-            pair!(tag!("list"), parse_one_generic)
-        ) => {|(_, generic)|  DataType::List(Box::new(generic)) } |
-        complete!(
-            pair!(tag!("option"), parse_one_generic)
-        ) => {|(_, generic)|  DataType::Option(Box::new(generic)) }
-    )
-);
+pub fn parse_generic_type(input: &[u8]) -> IResult<&[u8], DataType> {
+    alt((
+        map(pair(tag("map"), parse_two_generics), |(_, generics)| {
+            DataType::Map(Box::new(generics.0), Box::new(generics.1))
+        }),
+        map(pair(tag("list"), parse_one_generic), |(_, generic)| {
+            DataType::List(Box::new(generic))
+        }),
+        map(pair(tag("option"), parse_one_generic), |(_, generic)| {
+            DataType::Option(Box::new(generic))
+        }),
+    ))(input)
+}
 
-named!(
-    parse_type_without_generics<DataType>,
-    alt!(
-        complete!(parse_primitive) |
-        complete!(parse_user_type) => { |s| DataType::UserDefined(s) }
-    )
-);
+pub fn parse_type_without_generics(input: &[u8]) -> IResult<&[u8], DataType> {
+    alt((parse_primitive, map(parse_user_type, DataType::UserDefined)))(input)
+}
 
-named!(
-    pub parse_type<DataType>,
-    alt!(
-        parse_type_without_generics |
-        complete!(parse_generic_type)
-    )
-);
+pub fn parse_type(input: &[u8]) -> IResult<&[u8], DataType> {
+    alt((parse_type_without_generics, parse_generic_type))(input)
+}
 
 #[cfg(test)]
 mod tests {
 
     use super::*;
     use nom::{error::Error, error::ErrorKind, Err};
-
-    #[test]
-    fn test_parse_primitive() {
-        assert_eq!(parse_primitive(b"bool"), Ok((&b""[..], DataType::Bool)));
-        assert_eq!(parse_primitive(b"uint32"), Ok((&b""[..], DataType::Uint32)));
-        assert_eq!(parse_primitive(b"uint64"), Ok((&b""[..], DataType::Uint64)));
-        assert_eq!(parse_primitive(b"int32"), Ok((&b""[..], DataType::Int32)));
-        assert_eq!(parse_primitive(b"int64"), Ok((&b""[..], DataType::Int64)));
-        assert_eq!(parse_primitive(b"sint32"), Ok((&b""[..], DataType::SInt32)));
-        assert_eq!(parse_primitive(b"sint64"), Ok((&b""[..], DataType::SInt64)));
-        assert_eq!(
-            parse_primitive(b"fixed32"),
-            Ok((&b""[..], DataType::Fixed32))
-        );
-        assert_eq!(
-            parse_primitive(b"fixed64"),
-            Ok((&b""[..], DataType::Fixed64))
-        );
-        assert_eq!(
-            parse_primitive(b"sfixed32"),
-            Ok((&b""[..], DataType::SFixed32))
-        );
-        assert_eq!(
-            parse_primitive(b"sfixed64"),
-            Ok((&b""[..], DataType::SFixed64))
-        );
-        assert_eq!(parse_primitive(b"float"), Ok((&b""[..], DataType::Float)));
-        assert_eq!(parse_primitive(b"double"), Ok((&b""[..], DataType::Double)));
-        assert_eq!(parse_primitive(b"string"), Ok((&b""[..], DataType::String)));
-        assert_eq!(parse_primitive(b"bytes"), Ok((&b""[..], DataType::Bytes)));
-        assert_eq!(
-            parse_primitive(b"EntityId"),
-            Ok((&b""[..], DataType::EntityID))
-        );
-        assert_eq!(parse_primitive(b"Entity"), Ok((&b""[..], DataType::Entity)));
-        assert_eq!(
-            parse_primitive(b"CustomComponent"),
-            Err(Err::Error(Error::new(
-                &b"CustomComponent"[..],
-                ErrorKind::Alt
-            )))
-        );
-    }
 
     #[test]
     fn test_parse_type() {
@@ -189,7 +126,7 @@ mod tests {
             parse_primitive(b"customComponent"),
             Err(Err::Error(Error::new(
                 &b"customComponent"[..],
-                ErrorKind::Alt
+                ErrorKind::Tag
             )))
         );
     }
