@@ -44,16 +44,6 @@ named!(
 mod tests {
 
     use super::*;
-    
-
-    #[test]
-    #[cfg(not(tarpaulin))]
-    fn test_parse_package_components() {
-        assert_eq!(
-            parse_package_components(b"io.nebulis"),
-            Ok(("".as_bytes(), vec!["io".to_string(), "nebulis".to_string()]))
-        )
-    }
 
     #[test]
     fn test_parse_package_name() {
