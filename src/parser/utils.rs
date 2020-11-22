@@ -1,16 +1,12 @@
-use std::convert::identity;
+use std::{convert::identity, iter::FromIterator};
 
 use nom::{
     branch::alt,
-    bytes::complete::take_while1,
     bytes::complete::{is_not, tag},
-    character::{
-        complete::{char, multispace0, multispace1, one_of},
-        is_digit,
-    },
+    character::complete::{char, multispace0, multispace1, one_of},
     combinator::{map, map_opt, map_res, peek, value},
     error::ParseError,
-    multi::{fold_many1, many0, separated_list1},
+    multi::{fold_many1, many0, many1, separated_list1},
     sequence::{delimited, pair},
     IResult,
 };
@@ -37,13 +33,16 @@ pub fn uppercase(input: &[u8]) -> IResult<&[u8], char> {
     one_of("ABCDEFGHIJKLMNOPQRSTUVWXYZ")(input)
 }
 
-#[allow(dead_code)]
+pub fn digit(input: &[u8]) -> IResult<&[u8], char> {
+    one_of("0123456789")(input)
+}
+
 pub fn lowercase(input: &[u8]) -> IResult<&[u8], char> {
     one_of("abcdefghijklmnopqrstuvwxyz")(input)
 }
 
 pub fn lower_alphanum(input: &[u8]) -> IResult<&[u8], char> {
-    one_of("abcdefghijklmnopqrstuvwxyz1234567890")(input)
+    alt((lowercase, digit))(input)
 }
 
 pub fn camel_case_component(input: &[u8]) -> IResult<&[u8], String> {
@@ -90,9 +89,7 @@ pub fn upper_snake_case(input: &[u8]) -> IResult<&[u8], String> {
 }
 
 pub fn parse_usize(input: &[u8]) -> IResult<&[u8], usize> {
-    map_res(map_res(take_while1(is_digit), std::str::from_utf8), |s| {
-        s.parse::<usize>()
-    })(input)
+    map_res(map(many1(digit), String::from_iter), |s| s.parse::<usize>())(input)
 }
 
 pub fn parse_comment(input: &[u8]) -> IResult<&[u8], Option<String>> {
