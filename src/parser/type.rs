@@ -10,13 +10,13 @@ use nom::{
     bytes::complete::tag,
     character::complete::{char, multispace0},
     combinator::map,
-    multi::separated_list1,
+    multi::separated_list0,
     sequence::{delimited, pair, preceded, terminated, tuple},
     IResult,
 };
 
 fn parse_members(input: &[u8]) -> IResult<&[u8], Vec<Member>> {
-    separated_list1(
+    separated_list0(
         multispace0,
         terminated(parse_member, pair(multispace0, char(';'))),
     )(input)
@@ -47,7 +47,18 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_parse_enum() {
+    fn test_parse_type() {
+        assert_eq!(
+            parse_type(b"type AnimalCounter { }"),
+            Ok((
+                &b""[..],
+                Type {
+                    comments: Vec::new(),
+                    name: "AnimalCounter".to_string(),
+                    members: vec![]
+                }
+            ))
+        );
         assert_eq!(
             parse_type(b"type AnimalCounter {\n\tuint32 rabbits = 1 ;\n\tdouble platypus = 2;\n}"),
             Ok((
