@@ -40,3 +40,61 @@ pub fn parse_type(input: &[u8]) -> IResult<&[u8], Type> {
         },
     )(input)
 }
+
+#[cfg(test)]
+mod tests {
+
+    use super::*;
+
+    #[test]
+    fn test_parse_enum() {
+        assert_eq!(
+            parse_type(b"type AnimalCounter {\n\tuint32 rabbits = 1 ;\n\tdouble platypus = 2;\n}"),
+            Ok((
+                &b""[..],
+                Type {
+                    comments: Vec::new(),
+                    name: "AnimalCounter".to_string(),
+                    members: vec![
+                        Member {
+                            m_type: crate::ast::DataType::Uint32,
+                            name: "rabbits".to_owned(),
+                            id: 1,
+                            comments: vec![]
+                        },
+                        Member {
+                            m_type: crate::ast::DataType::Double,
+                            name: "platypus".to_owned(),
+                            id: 2,
+                            comments: vec![]
+                        },
+                    ]
+                }
+            ))
+        );
+        assert_eq!(
+            parse_type(b"// This is used to count animals\ntype AnimalCounter {\n\t// This is used to count rabbits\n\tuint32 rabbits = 1 ;\n\t// This is used to count platypus\n\tdouble platypus = 2;\n}"),
+            Ok((
+                &b""[..],
+                Type {
+                    comments: vec![" This is used to count animals".to_owned()],
+                    name: "AnimalCounter".to_string(),
+                    members: vec![
+                        Member {
+                            m_type: crate::ast::DataType::Uint32,
+                            name: "rabbits".to_owned(),
+                            id: 1,
+                            comments: vec![" This is used to count rabbits".to_owned()]
+                        },
+                        Member {
+                            m_type: crate::ast::DataType::Double,
+                            name: "platypus".to_owned(),
+                            id: 2,
+                            comments: vec![" This is used to count platypus".to_owned()]
+                        },
+                    ]
+                }
+            ))
+        );
+    }
+}
