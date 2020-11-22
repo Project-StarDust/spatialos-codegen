@@ -40,3 +40,59 @@ pub fn parse_enum(input: &[u8]) -> IResult<&[u8], Enum> {
         },
     )(input)
 }
+
+#[cfg(test)]
+mod tests {
+
+    use super::*;
+
+    #[test]
+    fn test_parse_enum() {
+        assert_eq!(
+            parse_enum(
+                b"enum AnimalCounter {\n\tRABBITS_COUNTER = 1 ;\n\tPLATYPUS_COUNTER = 2;\n}"
+            ),
+            Ok((
+                &b""[..],
+                Enum {
+                    comments: Vec::new(),
+                    name: "AnimalCounter".to_string(),
+                    values: vec![
+                        Value {
+                            name: "RABBITS_COUNTER".to_owned(),
+                            id: 1,
+                            comments: vec![]
+                        },
+                        Value {
+                            name: "PLATYPUS_COUNTER".to_owned(),
+                            id: 2,
+                            comments: vec![]
+                        },
+                    ]
+                }
+            ))
+        );
+        assert_eq!(
+            parse_enum(b"// This is used to count animals\nenum AnimalCounter {\n\t// This is used to count rabbits\n\tRABBITS_COUNTER = 1;\n\t// This is used to count platypus\n\tPLATYPUS_COUNTER = 2 ;\n}"),
+            Ok((
+                &b""[..],
+                Enum {
+                    comments: vec![" This is used to count animals".to_owned()],
+                    name: "AnimalCounter".to_string(),
+                    values: vec![
+                        Value {
+                            name: "RABBITS_COUNTER".to_owned(),
+                            id: 1,
+                            comments: vec![" This is used to count rabbits".to_owned()]
+                        },
+                        Value {
+                            name: "PLATYPUS_COUNTER".to_owned(),
+                            id: 2,
+                            comments: vec![" This is used to count platypus".to_owned()]
+                        },
+                    ]
+                }
+            ))
+        );
+    }
+}
