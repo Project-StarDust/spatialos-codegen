@@ -111,15 +111,12 @@ pub fn parse_comment(input: &[u8]) -> IResult<&[u8], Option<String>> {
 }
 
 pub fn parse_comments(input: &[u8]) -> IResult<&[u8], Vec<String>> {
-    map(
-        many0(delimited(multispace0, parse_comment, multispace0)),
-        |c| {
-            c.into_iter()
-                .filter_map(identity)
-                .map(|s| s.replace("\"", "\\\""))
-                .collect::<Vec<_>>()
-        },
-    )(input)
+    map(many0(ws0(parse_comment)), |c| {
+        c.into_iter()
+            .filter_map(identity)
+            .map(|s| s.replace("\"", "\\\""))
+            .collect::<Vec<_>>()
+    })(input)
 }
 
 #[cfg(test)]
