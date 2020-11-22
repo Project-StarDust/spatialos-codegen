@@ -117,6 +117,21 @@ mod tests {
             ))
         );
         assert_eq!(
+            parse_type(b"map<float, bool>"),
+            Ok((
+                &b""[..],
+                DataType::Map(Box::new(DataType::Float), Box::new(DataType::Bool))
+            ))
+        );
+        assert_eq!(
+            parse_type(b"option<bool>"),
+            Ok((&b""[..], DataType::Option(Box::new(DataType::Bool))))
+        );
+        assert_eq!(
+            parse_type(b"list<bool>"),
+            Ok((&b""[..], DataType::List(Box::new(DataType::Bool))))
+        );
+        assert_eq!(
             parse_primitive(b"customComponent"),
             Err(Err::Error(Error::new(
                 &b"customComponent"[..],

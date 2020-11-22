@@ -11,7 +11,7 @@ use nom::{
     character::complete::multispace1,
     character::complete::{char, multispace0},
     combinator::map,
-    multi::separated_list1,
+    multi::separated_list0,
     sequence::delimited,
     sequence::{preceded, tuple},
     IResult,
@@ -20,7 +20,7 @@ use nom::{
 pub fn parse_args(input: &[u8]) -> IResult<&[u8], Vec<DataType>> {
     delimited(
         char('('),
-        ws0(separated_list1(ws0(char(',')), parse_type)),
+        ws0(separated_list0(ws0(char(',')), parse_type)),
         char(')'),
     )(input)
 }
@@ -38,4 +38,36 @@ pub fn parse_command(input: &[u8]) -> IResult<&[u8], Command> {
             args,
         },
     )(input)
+}
+
+#[cfg(test)]
+mod tests {
+
+    use super::*;
+
+    #[test]
+    fn test_parse_command() {
+        assert_eq!(
+            parse_command(b"command uint32 count_rabbits()"),
+            Ok((
+                &b""[..],
+                Command {
+                    name: "count_rabbits".to_string(),
+                    args: vec![],
+                    r_type: DataType::Uint32
+                }
+            ))
+        );
+        assert_eq!(
+            parse_command(b"command uint32 count_rabbits(bool)"),
+            Ok((
+                &b""[..],
+                Command {
+                    name: "count_rabbits".to_string(),
+                    args: vec![DataType::Bool],
+                    r_type: DataType::Uint32
+                }
+            ))
+        );
+    }
 }
