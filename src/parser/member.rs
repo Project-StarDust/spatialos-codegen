@@ -31,3 +31,39 @@ pub fn parse_member(input: &[u8]) -> IResult<&[u8], Member> {
         },
     )(input)
 }
+
+#[cfg(test)]
+mod tests {
+
+    use crate::ast::DataType;
+
+    use super::*;
+
+    #[test]
+    fn test_parse_member() {
+        assert_eq!(
+            parse_member(b"uint32 rabbits = 1"),
+            Ok((
+                &b""[..],
+                Member {
+                    comments: Vec::new(),
+                    name: "rabbits".to_string(),
+                    m_type: DataType::Uint32,
+                    id: 1
+                }
+            ))
+        );
+        assert_eq!(
+            parse_member(b"// This is the number of rabbits\nuint32 rabbits = 1"),
+            Ok((
+                &b""[..],
+                Member {
+                    comments: vec![" This is the number of rabbits".to_string()],
+                    name: "rabbits".to_string(),
+                    m_type: DataType::Uint32,
+                    id: 1
+                }
+            ))
+        );
+    }
+}
