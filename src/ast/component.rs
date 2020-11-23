@@ -1,8 +1,8 @@
 use crate::ast::Command;
+use crate::ast::Enum;
 use crate::ast::Event;
 use crate::ast::Member;
 use crate::ast::Type;
-use crate::ast::Enum;
 use std::convert::identity;
 
 #[derive(Debug, Eq, PartialEq, Clone)]
@@ -14,13 +14,23 @@ pub struct Component {
     pub commands: Vec<Command>,
     pub comments: Vec<String>,
     pub enums: Vec<Enum>,
-    pub types: Vec<Type>
+    pub types: Vec<Type>,
 }
 
 impl Component {
     pub fn generate_one(&self) -> String {
         format!(
-            "{}\n{}{}\n{}\npub struct {} {{{}}}",
+            "{}{}{}\n{}{}\n{}\npub struct {} {{{}}}",
+            if !self.enums.is_empty() {
+                Enum::generate_multiple(&self.enums) + "\n"
+            } else {
+                "".to_owned()
+            },
+            if !self.types.is_empty() {
+                Type::generate_multiple(&self.types) + "\n"
+            } else {
+                "".to_owned()
+            },
             "#[allow(dead_code)]".to_string(),
             self.comments.iter().fold(String::new(), |acc, val| {
                 if !acc.is_empty() {

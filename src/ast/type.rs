@@ -14,7 +14,17 @@ pub struct Type {
 impl Type {
     pub fn generate_one(&self) -> String {
         format!(
-            "{}\n{}{}\npub struct {} {{{}}}",
+            "{}{}{}\n{}{}\npub struct {} {{{}}}",
+            if !self.enums.is_empty() {
+                Enum::generate_multiple(&self.enums) + "\n"
+            } else {
+                "".to_owned()
+            },
+            if !self.types.is_empty() {
+                Type::generate_multiple(&self.types) + "\n"
+            } else {
+                "".to_owned()
+            },
             "#[allow(dead_code)]",
             self.comments.iter().fold(String::new(), |acc, val| {
                 if !acc.is_empty() {
