@@ -60,7 +60,7 @@ impl TypeBuilder {
             members: self.members,
             comments: self.comments,
             types: self.types,
-            enums: self.enums
+            enums: self.enums,
         })
     }
 }
@@ -236,40 +236,34 @@ mod tests {
                             comments: vec![]
                         },
                     ],
-                    types: vec![
-                        Type {
+                    types: vec![Type {
+                        comments: vec![],
+                        name: "LifeState".to_owned(),
+                        members: vec![Member {
+                            m_type: crate::ast::DataType::Uint32,
+                            name: "health".to_owned(),
+                            id: 1,
                             comments: vec![],
-                            name: "LifeState".to_owned(),
-                            members: vec![
-                                Member {
-                                    m_type: crate::ast::DataType::Uint32,
-                                    name: "health".to_owned(),
-                                    id: 1,
-                                    comments: vec![],
-                                },
-                            ],
-                            types: vec![],
-                            enums: vec![]
-                        }
-                    ],
-                    enums: vec![
-                        Enum {
-                            comments: vec![],
-                            name: "Gender".to_owned(),
-                            values: vec![
-                                Value {
-                                    comments: vec![],
-                                    name: "MALE".to_owned(),
-                                    id: 1
-                                },
-                                Value {
-                                    comments: vec![],
-                                    name: "FEMALE".to_owned(),
-                                    id: 2
-                                }
-                            ]   
-                        }
-                    ]
+                        },],
+                        types: vec![],
+                        enums: vec![]
+                    }],
+                    enums: vec![Enum {
+                        comments: vec![],
+                        name: "Gender".to_owned(),
+                        values: vec![
+                            Value {
+                                comments: vec![],
+                                name: "MALE".to_owned(),
+                                id: 1
+                            },
+                            Value {
+                                comments: vec![],
+                                name: "FEMALE".to_owned(),
+                                id: 2
+                            }
+                        ]
+                    }]
                 }
             ))
         );
