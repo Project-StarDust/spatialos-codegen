@@ -134,7 +134,9 @@ mod tests {
                     Type {
                         name: "IsDead".to_owned(),
                         members: vec![],
-                        comments: vec![]
+                        comments: vec![],
+                        types: vec![],
+                        enums: vec![]
                     },
                     Type {
                         name: "Damage".to_owned(),
@@ -144,12 +146,16 @@ mod tests {
                             m_type: DataType::Uint32,
                             id: 1
                         }],
-                        comments: vec![]
+                        comments: vec![],
+                        types: vec![],
+                        enums: vec![]
                     },
                     Type {
                         name: "DamageResponse".to_owned(),
                         members: vec![],
-                        comments: vec![]
+                        comments: vec![],
+                        types: vec![],
+                        enums: vec![]
                     },
                 ],
                 enums: vec![Enum {
@@ -205,7 +211,9 @@ mod tests {
                         name: "damage".to_owned(),
                         r_type: DataType::UserDefined("DamageResponse".to_owned()),
                         args: vec![DataType::UserDefined("Damage".to_owned())],
-                    }]
+                    }],
+                    enums: vec![],
+                    types: vec![]
                 }]
             })
         );

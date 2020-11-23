@@ -1,4 +1,5 @@
-use crate::ast::Member;
+use crate::ast::{Enum, Member};
+
 use std::convert::identity;
 
 #[derive(Debug, Eq, PartialEq, Clone)]
@@ -6,6 +7,8 @@ pub struct Type {
     pub name: String,
     pub members: Vec<Member>,
     pub comments: Vec<String>,
+    pub types: Vec<Type>,
+    pub enums: Vec<Enum>,
 }
 
 impl Type {

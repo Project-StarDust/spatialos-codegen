@@ -1,6 +1,8 @@
 use crate::ast::Command;
 use crate::ast::Event;
 use crate::ast::Member;
+use crate::ast::Type;
+use crate::ast::Enum;
 use std::convert::identity;
 
 #[derive(Debug, Eq, PartialEq, Clone)]
@@ -11,6 +13,8 @@ pub struct Component {
     pub events: Vec<Event>,
     pub commands: Vec<Command>,
     pub comments: Vec<String>,
+    pub enums: Vec<Enum>,
+    pub types: Vec<Type>
 }
 
 impl Component {
