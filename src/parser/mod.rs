@@ -8,4 +8,4 @@ pub mod package_name;
 pub mod schema_file;
 pub mod r#type;
 pub mod utils;
-pub mod value;
+pub mod variant;

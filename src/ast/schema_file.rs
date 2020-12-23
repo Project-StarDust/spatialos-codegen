@@ -1,14 +1,17 @@
-use crate::ast::header::Header;
-use crate::ast::Component;
-use crate::ast::Enum;
-use crate::ast::Type;
-use crate::parser::schema_file::parse_schema;
-use std::convert::TryFrom;
-use std::fs::File;
-use std::io::Read;
-use std::io::Write;
-use std::path::Path;
-use std::path::PathBuf;
+use quote::__private::TokenStream;
+
+use crate::{
+    ast::{Component, Enum, Type},
+    codegen::Generator,
+    parser::schema_file::parse_schema,
+};
+use std::{
+    convert::TryFrom,
+    fs::File,
+    io::{Read, Write},
+    path::{Path, PathBuf},
+    process::Command,
+};
 
 #[derive(Debug, Eq, PartialEq, Clone)]
 pub struct SchemaFile {
@@ -20,14 +23,20 @@ pub struct SchemaFile {
 }
 
 impl SchemaFile {
-    fn generate(&self) -> String {
-        format!(
-            "{}{}{}{}",
-            Header::generate(),
-            Enum::generate_multiple(&self.enums),
-            Type::generate_multiple(&self.types),
-            Component::generate_multiple(&self.components)
-        )
+    fn generate(&self) -> TokenStream {
+        let enums = Enum::generate_multiple(&self.enums);
+        let types = Type::generate_multiple(&self.types);
+        let components = Component::generate_multiple(&self.components);
+        quote! {
+            #[allow(unused_imports)]
+            use std::collections::HashMap;
+
+            #enums
+
+            #types
+
+            #components
+        }
     }
 
     pub fn get_exports(&self) -> Vec<String> {
@@ -41,7 +50,11 @@ impl SchemaFile {
     pub fn generate_schema<P: AsRef<Path> + Clone>(&self, path: P) -> Result<(), std::io::Error> {
         std::fs::create_dir_all(path.clone()).map(|_| {
             let mut file = File::create(path.clone().as_ref().join(self.name.clone() + ".rs"))?;
-            writeln!(file, "{}", self.generate())?;
+            write!(&mut file, "{}", self.generate())?;
+            Command::new("rustfmt")
+                .arg(path.clone().as_ref().join(self.name.clone() + ".rs"))
+                .output()
+                .expect("Failed to execute rustfmt");
             Ok(())
         })?
     }

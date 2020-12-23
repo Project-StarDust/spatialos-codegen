@@ -1,8 +1,8 @@
 use crate::{
-    ast::{Enum, Value},
+    ast::{Enum, Variant},
     parser::{
         utils::{camel_case as parse_enum_name, parse_comments, ws0, ws1},
-        value::parse_value,
+        variant::parse_variant,
     },
 };
 use nom::{
@@ -15,15 +15,15 @@ use nom::{
     IResult,
 };
 
-fn parse_values(input: &[u8]) -> IResult<&[u8], Vec<Value>> {
+fn parse_variants(input: &[u8]) -> IResult<&[u8], Vec<Variant>> {
     separated_list1(
         multispace0,
-        terminated(parse_value, tuple((multispace0, char(';')))),
+        terminated(parse_variant, tuple((multispace0, char(';')))),
     )(input)
 }
 
-fn parse_enum_body(input: &[u8]) -> IResult<&[u8], Vec<Value>> {
-    delimited(char('{'), ws0(parse_values), char('}'))(input)
+fn parse_enum_body(input: &[u8]) -> IResult<&[u8], Vec<Variant>> {
+    delimited(char('{'), ws0(parse_variants), char('}'))(input)
 }
 
 pub fn parse_enum(input: &[u8]) -> IResult<&[u8], Enum> {
@@ -33,9 +33,9 @@ pub fn parse_enum(input: &[u8]) -> IResult<&[u8], Enum> {
             preceded(tag("enum"), ws1(parse_enum_name)),
             parse_enum_body,
         )),
-        |(comments, name, values)| Enum {
+        |(comments, name, variants)| Enum {
             name,
-            values,
+            variants,
             comments,
         },
     )(input)
@@ -57,13 +57,13 @@ mod tests {
                 Enum {
                     comments: Vec::new(),
                     name: "AnimalCounter".to_string(),
-                    values: vec![
-                        Value {
+                    variants: vec![
+                        Variant {
                             name: "RABBITS_COUNTER".to_owned(),
                             id: 1,
                             comments: vec![]
                         },
-                        Value {
+                        Variant {
                             name: "PLATYPUS_COUNTER".to_owned(),
                             id: 2,
                             comments: vec![]
@@ -79,13 +79,13 @@ mod tests {
                 Enum {
                     comments: vec![" This is used to count animals".to_owned()],
                     name: "AnimalCounter".to_string(),
-                    values: vec![
-                        Value {
+                    variants: vec![
+                        Variant {
                             name: "RABBITS_COUNTER".to_owned(),
                             id: 1,
                             comments: vec![" This is used to count rabbits".to_owned()]
                         },
-                        Value {
+                        Variant {
                             name: "PLATYPUS_COUNTER".to_owned(),
                             id: 2,
                             comments: vec![" This is used to count platypus".to_owned()]

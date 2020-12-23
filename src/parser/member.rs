@@ -9,7 +9,7 @@ use crate::{
     ast::{DataType, Member},
     parser::{
         data_type::parse_type,
-        utils::{parse_comments, parse_usize, snake_case as parse_member_name, ws0},
+        utils::{parse_comments, parse_u32, snake_case as parse_member_name, ws0},
     },
 };
 
@@ -21,7 +21,7 @@ pub fn parse_member(input: &[u8]) -> IResult<&[u8], Member> {
     map(
         pair(
             parse_comments,
-            separated_pair(parse_member_type_name, ws0(char('=')), parse_usize),
+            separated_pair(parse_member_type_name, ws0(char('=')), parse_u32),
         ),
         |(comments, ((ty, name), id))| Member {
             m_type: ty,

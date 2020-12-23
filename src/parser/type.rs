@@ -104,7 +104,7 @@ pub fn parse_type(input: &[u8]) -> IResult<&[u8], Type> {
 #[cfg(test)]
 mod tests {
 
-    use crate::ast::Value;
+    use crate::ast::Variant;
 
     use super::*;
 
@@ -251,13 +251,13 @@ mod tests {
                     enums: vec![Enum {
                         comments: vec![],
                         name: "Gender".to_owned(),
-                        values: vec![
-                            Value {
+                        variants: vec![
+                            Variant {
                                 comments: vec![],
                                 name: "MALE".to_owned(),
                                 id: 1
                             },
-                            Value {
+                            Variant {
                                 comments: vec![],
                                 name: "FEMALE".to_owned(),
                                 id: 2

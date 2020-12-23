@@ -2,4 +2,6 @@ package io.nebulis;
 
 component PlayerMarker {
 	id = 4000;
+
+	Health health = 6;
 }

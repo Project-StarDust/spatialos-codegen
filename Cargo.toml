@@ -12,8 +12,10 @@ repository = "https://github.com/Project-StarDust/spatialos-codegen"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+syn = {version = "1.0", features = ["full"] }
 nom = "6"
 walkdir = "2.3.1"
+quote = "1.0"
 
 [[example]]
 name = "main"

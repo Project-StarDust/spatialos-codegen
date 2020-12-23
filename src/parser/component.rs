@@ -7,7 +7,7 @@ use crate::{
         r#enum::parse_enum,
         r#type::parse_type,
         utils::camel_case as parse_component_name,
-        utils::{parse_comments, parse_usize, ws0, ws1},
+        utils::{parse_comments, parse_u32, ws0, ws1},
     },
 };
 
@@ -23,7 +23,7 @@ use nom::{
 
 #[derive(Debug)]
 enum ComponentProperty {
-    ID(usize),
+    ID(u32),
     Member(Member),
     Command(Command),
     Event(Event),
@@ -34,7 +34,7 @@ enum ComponentProperty {
 #[derive(Default)]
 struct ComponentBuilder {
     pub name: Option<String>,
-    pub id: Option<usize>,
+    pub id: Option<u32>,
     pub members: Vec<Member>,
     pub commands: Vec<Command>,
     pub events: Vec<Event>,
@@ -82,8 +82,8 @@ impl ComponentBuilder {
     }
 }
 
-fn parse_id(input: &[u8]) -> IResult<&[u8], usize> {
-    preceded(tag("id"), preceded(ws0(char('=')), parse_usize))(input)
+fn parse_id(input: &[u8]) -> IResult<&[u8], u32> {
+    preceded(tag("id"), preceded(ws0(char('=')), parse_u32))(input)
 }
 
 fn parse_direct_property(input: &[u8]) -> IResult<&[u8], ComponentProperty> {
@@ -139,7 +139,7 @@ pub fn parse_component(input: &[u8]) -> IResult<&[u8], Component> {
 #[cfg(test)]
 mod tests {
 
-    use crate::ast::Value;
+    use crate::ast::Variant;
 
     use super::*;
 
@@ -225,14 +225,12 @@ mod tests {
                     ],
                     events: vec![Event {
                         name: "new_rabbit".to_owned(),
-                        r_type: crate::ast::data_type::DataType::UserDefined("Rabbit".to_owned())
+                        r_type: crate::ast::DataType::UserDefined("Rabbit".to_owned())
                     }],
                     commands: vec![Command {
                         name: "count_platypus".to_owned(),
-                        r_type: crate::ast::data_type::DataType::Uint32,
-                        args: vec![crate::ast::data_type::DataType::UserDefined(
-                            "Field".to_owned()
-                        )]
+                        r_type: crate::ast::DataType::Uint32,
+                        args: vec![crate::ast::DataType::UserDefined("Field".to_owned())]
                     }],
                     enums: vec![],
                     types: vec![]
@@ -263,14 +261,12 @@ mod tests {
                     ],
                     events: vec![Event {
                         name: "new_rabbit".to_owned(),
-                        r_type: crate::ast::data_type::DataType::UserDefined("Rabbit".to_owned())
+                        r_type: crate::ast::DataType::UserDefined("Rabbit".to_owned())
                     }],
                     commands: vec![Command {
                         name: "count_platypus".to_owned(),
-                        r_type: crate::ast::data_type::DataType::Uint32,
-                        args: vec![crate::ast::data_type::DataType::UserDefined(
-                            "Field".to_owned()
-                        )]
+                        r_type: crate::ast::DataType::Uint32,
+                        args: vec![crate::ast::DataType::UserDefined("Field".to_owned())]
                     }],
                     enums: vec![],
                     types: vec![]
@@ -301,25 +297,23 @@ mod tests {
                     ],
                     events: vec![Event {
                         name: "new_rabbit".to_owned(),
-                        r_type: crate::ast::data_type::DataType::UserDefined("Rabbit".to_owned())
+                        r_type: crate::ast::DataType::UserDefined("Rabbit".to_owned())
                     }],
                     commands: vec![Command {
                         name: "count_platypus".to_owned(),
-                        r_type: crate::ast::data_type::DataType::Uint32,
-                        args: vec![crate::ast::data_type::DataType::UserDefined(
-                            "Field".to_owned()
-                        )]
+                        r_type: crate::ast::DataType::Uint32,
+                        args: vec![crate::ast::DataType::UserDefined("Field".to_owned())]
                     }],
                     enums: vec![Enum {
                         comments: vec![],
                         name: "LifeState".to_owned(),
-                        values: vec![
-                            Value {
+                        variants: vec![
+                            Variant {
                                 comments: vec![],
                                 name: "ALIVE".to_owned(),
                                 id: 0
                             },
-                            Value {
+                            Variant {
                                 comments: vec![],
                                 name: "DEAD".to_owned(),
                                 id: 1
@@ -352,13 +346,13 @@ mod tests {
                         enums: vec![Enum {
                             comments: vec![],
                             name: "Gender".to_owned(),
-                            values: vec![
-                                Value {
+                            variants: vec![
+                                Variant {
                                     comments: vec![],
                                     name: "MALE".to_owned(),
                                     id: 1
                                 },
-                                Value {
+                                Variant {
                                     comments: vec![],
                                     name: "FEMALE".to_owned(),
                                     id: 2

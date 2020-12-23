@@ -88,8 +88,8 @@ pub fn upper_snake_case(input: &[u8]) -> IResult<&[u8], String> {
     )(input)
 }
 
-pub fn parse_usize(input: &[u8]) -> IResult<&[u8], usize> {
-    map_res(map(many1(digit), String::from_iter), |s| s.parse::<usize>())(input)
+pub fn parse_u32(input: &[u8]) -> IResult<&[u8], u32> {
+    map_res(map(many1(digit), String::from_iter), |s| s.parse::<u32>())(input)
 }
 
 pub fn parse_comment(input: &[u8]) -> IResult<&[u8], Option<String>> {
