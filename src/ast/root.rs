@@ -1,5 +1,5 @@
-use crate::ast::ASTNode;
 use crate::ast::SchemaFile;
+use crate::{ast::ASTNode, resolver::resolve_types};
 use std::convert::TryFrom;
 use std::ffi::OsStr;
 use std::path::Path;
@@ -60,15 +60,16 @@ pub struct AST {
 }
 
 impl AST {
-    pub fn generate<P: AsRef<Path> + Clone>(&self, path: P) -> Result<(), std::io::Error> {
+    pub fn generate<P: AsRef<Path> + Clone, S: AsRef<str>>(self, path: P, module: S) -> Result<(), std::io::Error> {
+        let new_ast = resolve_types(self, module);
         let path_clone = path.clone();
         if path_clone.as_ref().exists() {
             std::fs::remove_dir_all(path)?;
         }
-        for node in &self.inner {
+        for node in &new_ast.inner {
             node.generate_node(path_clone.clone())?;
         }
-        ASTNode::generate_mod_rs(&self.inner, path_clone)
+        ASTNode::generate_mod_rs(&new_ast.inner, path_clone)
     }
 
     fn merge_schema<T: AsRef<str>>(self, schema: &SchemaFile, path: &[T]) -> Self {

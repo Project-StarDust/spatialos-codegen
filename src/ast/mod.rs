@@ -210,6 +210,7 @@ impl DataType {
 pub enum ResolvedTypeKind {
     Enum,
     Type,
+    Component,
 }
 
 #[derive(Debug, Eq, PartialEq, Clone)]
@@ -218,13 +219,20 @@ pub enum UserDefinedType {
     Resolved(String, ResolvedTypeKind),
 }
 
+impl From<&(String, ResolvedTypeKind)> for UserDefinedType {
+    fn from(data: &(String, ResolvedTypeKind)) -> Self {
+        Self::Resolved(data.0.clone(), data.1.clone())
+    }
+}
+
 impl UserDefinedType {
     pub fn spatial_type(&self) -> String {
         match self {
             Self::Unresolved(name) => panic!("{} is not resolved in the current schema", name),
-            Self::Resolved(_, kind) => match kind {
+            Self::Resolved(name, kind) => match kind {
                 ResolvedTypeKind::Enum => "enum",
                 ResolvedTypeKind::Type => "type",
+                ResolvedTypeKind::Component => panic!("You can't reference component {}", name),
             }
             .to_string(),
         }
