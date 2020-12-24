@@ -104,7 +104,7 @@ pub fn parse_type(input: &[u8]) -> IResult<&[u8], Type> {
 #[cfg(test)]
 mod tests {
 
-    use crate::ast::Variant;
+    use crate::ast::{UserDefinedType, Variant};
 
     use super::*;
 
@@ -224,13 +224,17 @@ mod tests {
                             comments: vec![]
                         },
                         Member {
-                            m_type: crate::ast::DataType::UserDefined("LifeState".to_owned()),
+                            m_type: crate::ast::DataType::UserDefined(UserDefinedType::Unresolved(
+                                "LifeState".to_owned()
+                            )),
                             name: "life_state".to_owned(),
                             id: 2,
                             comments: vec![]
                         },
                         Member {
-                            m_type: crate::ast::DataType::UserDefined("Gender".to_owned()),
+                            m_type: crate::ast::DataType::UserDefined(UserDefinedType::Unresolved(
+                                "Gender".to_owned()
+                            )),
                             name: "gender".to_owned(),
                             id: 3,
                             comments: vec![]

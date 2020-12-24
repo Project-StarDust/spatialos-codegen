@@ -200,17 +200,25 @@ mod tests {
                     events: vec![
                         Event {
                             name: "is_dead".to_owned(),
-                            r_type: DataType::UserDefined("IsDead".to_owned())
+                            r_type: DataType::UserDefined(UserDefinedType::Unresolved(
+                                "IsDead".to_owned()
+                            ))
                         },
                         Event {
                             name: "took_damage".to_owned(),
-                            r_type: DataType::UserDefined("Damage".to_owned())
+                            r_type: DataType::UserDefined(UserDefinedType::Unresolved(
+                                "Damage".to_owned()
+                            ))
                         }
                     ],
                     commands: vec![Command {
                         name: "damage".to_owned(),
-                        r_type: DataType::UserDefined("DamageResponse".to_owned()),
-                        args: vec![DataType::UserDefined("Damage".to_owned())],
+                        r_type: DataType::UserDefined(UserDefinedType::Unresolved(
+                            "DamageResponse".to_owned()
+                        )),
+                        args: vec![DataType::UserDefined(UserDefinedType::Unresolved(
+                            "Damage".to_owned()
+                        ))],
                     }],
                     enums: vec![],
                     types: vec![]

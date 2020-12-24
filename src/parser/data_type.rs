@@ -1,5 +1,5 @@
 use crate::{
-    ast::DataType,
+    ast::{DataType, UserDefinedType},
     parser::utils::{uppercase, ws0},
 };
 use nom::{
@@ -77,7 +77,13 @@ pub fn parse_generic_type(input: &[u8]) -> IResult<&[u8], DataType> {
 }
 
 pub fn parse_type_without_generics(input: &[u8]) -> IResult<&[u8], DataType> {
-    alt((parse_primitive, map(parse_user_type, DataType::UserDefined)))(input)
+    alt((
+        parse_primitive,
+        map(
+            map(parse_user_type, UserDefinedType::Unresolved),
+            DataType::UserDefined,
+        ),
+    ))(input)
 }
 
 pub fn parse_type(input: &[u8]) -> IResult<&[u8], DataType> {
@@ -113,7 +119,7 @@ mod tests {
             parse_type(b"CustomComponent"),
             Ok((
                 &b""[..],
-                DataType::UserDefined("CustomComponent".to_string())
+                DataType::UserDefined(UserDefinedType::Unresolved("CustomComponent".to_string()))
             ))
         );
         assert_eq!(

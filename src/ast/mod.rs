@@ -154,7 +154,7 @@ pub enum DataType {
     Map(Box<DataType>, Box<DataType>),
     List(Box<DataType>),
     Option(Box<DataType>),
-    UserDefined(String),
+    UserDefined(UserDefinedType),
 }
 
 impl DataType {
@@ -180,7 +180,7 @@ impl DataType {
             Self::Map(fst, snd) => format!("map<{},{}>", fst.spatial_type(), snd.spatial_type()),
             Self::List(fst) => format!("list<{}>", fst.spatial_type()),
             Self::Option(fst) => format!("option<{}>", fst.spatial_type()),
-            Self::UserDefined(fst) => fst.to_string(),
+            Self::UserDefined(fst) => fst.spatial_type(),
         }
     }
 
@@ -200,8 +200,40 @@ impl DataType {
             }
             Self::List(fst) => format!("Vec<{}>", (*fst).rust_type()),
             Self::Option(fst) => format!("Option<{}>", (*fst).rust_type()),
-            Self::UserDefined(fst) => fst.to_string(),
+            Self::UserDefined(fst) => fst.rust_type(),
             _ => "uninmplemented()!".to_string(),
+        }
+    }
+}
+
+#[derive(Debug, Eq, PartialEq, Clone)]
+pub enum ResolvedTypeKind {
+    Enum,
+    Type,
+}
+
+#[derive(Debug, Eq, PartialEq, Clone)]
+pub enum UserDefinedType {
+    Unresolved(String),
+    Resolved(String, ResolvedTypeKind),
+}
+
+impl UserDefinedType {
+    pub fn spatial_type(&self) -> String {
+        match self {
+            Self::Unresolved(name) => panic!("{} is not resolved in the current schema", name),
+            Self::Resolved(_, kind) => match kind {
+                ResolvedTypeKind::Enum => "enum",
+                ResolvedTypeKind::Type => "type",
+            }
+            .to_string(),
+        }
+    }
+
+    pub fn rust_type(&self) -> String {
+        match self {
+            Self::Unresolved(name) => name.to_owned(),
+            Self::Resolved(name, _) => name.to_owned(),
         }
     }
 }

@@ -139,7 +139,7 @@ pub fn parse_component(input: &[u8]) -> IResult<&[u8], Component> {
 #[cfg(test)]
 mod tests {
 
-    use crate::ast::Variant;
+    use crate::ast::{UserDefinedType, Variant};
 
     use super::*;
 
@@ -225,12 +225,16 @@ mod tests {
                     ],
                     events: vec![Event {
                         name: "new_rabbit".to_owned(),
-                        r_type: crate::ast::DataType::UserDefined("Rabbit".to_owned())
+                        r_type: crate::ast::DataType::UserDefined(UserDefinedType::Unresolved(
+                            "Rabbit".to_owned()
+                        ))
                     }],
                     commands: vec![Command {
                         name: "count_platypus".to_owned(),
                         r_type: crate::ast::DataType::Uint32,
-                        args: vec![crate::ast::DataType::UserDefined("Field".to_owned())]
+                        args: vec![crate::ast::DataType::UserDefined(
+                            UserDefinedType::Unresolved("Field".to_owned())
+                        )]
                     }],
                     enums: vec![],
                     types: vec![]
@@ -261,12 +265,16 @@ mod tests {
                     ],
                     events: vec![Event {
                         name: "new_rabbit".to_owned(),
-                        r_type: crate::ast::DataType::UserDefined("Rabbit".to_owned())
+                        r_type: crate::ast::DataType::UserDefined(UserDefinedType::Unresolved(
+                            "Rabbit".to_owned()
+                        ))
                     }],
                     commands: vec![Command {
                         name: "count_platypus".to_owned(),
                         r_type: crate::ast::DataType::Uint32,
-                        args: vec![crate::ast::DataType::UserDefined("Field".to_owned())]
+                        args: vec![crate::ast::DataType::UserDefined(
+                            UserDefinedType::Unresolved("Field".to_owned())
+                        )]
                     }],
                     enums: vec![],
                     types: vec![]
@@ -297,12 +305,16 @@ mod tests {
                     ],
                     events: vec![Event {
                         name: "new_rabbit".to_owned(),
-                        r_type: crate::ast::DataType::UserDefined("Rabbit".to_owned())
+                        r_type: crate::ast::DataType::UserDefined(UserDefinedType::Unresolved(
+                            "Rabbit".to_owned()
+                        ))
                     }],
                     commands: vec![Command {
                         name: "count_platypus".to_owned(),
                         r_type: crate::ast::DataType::Uint32,
-                        args: vec![crate::ast::DataType::UserDefined("Field".to_owned())]
+                        args: vec![crate::ast::DataType::UserDefined(
+                            UserDefinedType::Unresolved("Field".to_owned())
+                        )]
                     }],
                     enums: vec![Enum {
                         comments: vec![],
@@ -332,13 +344,17 @@ mod tests {
                             },
                             Member {
                                 comments: vec![],
-                                m_type: crate::ast::DataType::UserDefined("LifeState".to_owned()),
+                                m_type: crate::ast::DataType::UserDefined(
+                                    UserDefinedType::Unresolved("LifeState".to_owned())
+                                ),
                                 name: "life_state".to_owned(),
                                 id: 2
                             },
                             Member {
                                 comments: vec![],
-                                m_type: crate::ast::DataType::UserDefined("Gender".to_owned()),
+                                m_type: crate::ast::DataType::UserDefined(
+                                    UserDefinedType::Unresolved("Gender".to_owned())
+                                ),
                                 name: "gender".to_owned(),
                                 id: 3
                             }
