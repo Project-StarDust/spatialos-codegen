@@ -31,8 +31,7 @@ impl ASTNode {
             for module in Self::get_exports(nodes) {
                 writeln!(
                     file,
-                    "{}mod {};",
-                    if !module.1.is_empty() { "" } else { "pub " },
+                    "pub mod {};",
                     module.0
                 )?;
                 for usage in module.1 {

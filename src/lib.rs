@@ -7,3 +7,4 @@ mod resolver;
 extern crate quote;
 
 pub use ast::ASTBuilder;
+pub use resolver::resolve_types;

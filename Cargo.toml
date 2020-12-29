@@ -1,6 +1,6 @@
 [package]
 name = "spatialos-codegen"
-version = "0.2.1"
+version = "0.2.2"
 authors = ["Thomas Nicollet <thomas.nicollet@nebulis.io>"]
 edition = "2018"
 description = "Codegen tool used with spatialos-macro and spatialos-sdk"

@@ -40,7 +40,7 @@ impl Generator for Enum {
         let variants = <Variant as Generator>::generate_multiple(&self.variants);
         quote! {
             #(#[doc = #comments])*
-            #[derive(SpatialEnum)]
+            #[derive(SpatialEnum, Debug, Clone)]
             pub enum #name {
                 #variants
             }

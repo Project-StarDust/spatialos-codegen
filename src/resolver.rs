@@ -102,7 +102,7 @@ fn register_node<S: AsRef<str>>(
             .map(|node| register_node(path.as_ref().to_owned() + "::" + &package.name, node))
             .flatten()
             .collect(),
-        ASTNode::SchemaNode(schema) => register_schemas(path, schema),
+        ASTNode::SchemaNode(schema) => register_schemas(path.as_ref().to_string() + "::" + &schema.name, schema),
     }
 }
 
