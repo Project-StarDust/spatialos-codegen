@@ -15,7 +15,7 @@ impl Generator for Component {
 
             #types
 
-            #[allow_dead_code]
+            #[allow(dead_code)]
             #(#[doc = #comments])*
             #[derive(SpatialComponent)]
             #[id(#id)]
@@ -95,7 +95,7 @@ impl Generator for Type {
 
             #types
 
-            #[allow_dead_code]
+            #[allow(dead_code)]
             #(#[doc = #comments])*
             #[derive(SpatialType)]
             pub struct #name {
