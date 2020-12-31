@@ -29,11 +29,7 @@ impl ASTNode {
         std::fs::create_dir_all(path.clone()).map(|_| {
             let mut file = File::create(path.clone().as_ref().join("mod.rs"))?;
             for module in Self::get_exports(nodes) {
-                writeln!(
-                    file,
-                    "pub mod {};",
-                    module.0
-                )?;
+                writeln!(file, "pub mod {};", module.0)?;
                 for usage in module.1 {
                     writeln!(file, "pub use {}::{};", module.0, usage)?;
                 }

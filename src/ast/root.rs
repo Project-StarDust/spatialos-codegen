@@ -60,7 +60,11 @@ pub struct AST {
 }
 
 impl AST {
-    pub fn generate<P: AsRef<Path> + Clone, S: AsRef<str>>(self, path: P, module: S) -> Result<(), std::io::Error> {
+    pub fn generate<P: AsRef<Path> + Clone, S: AsRef<str>>(
+        self,
+        path: P,
+        module: S,
+    ) -> Result<(), std::io::Error> {
         let new_ast = resolve_types(self, module);
         let path_clone = path.clone();
         if path_clone.as_ref().exists() {

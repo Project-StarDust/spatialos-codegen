@@ -1,15 +1,84 @@
 use quote::__private::TokenStream;
 
-use crate::ast::{Component, Enum, Member, Type, Variant};
+use crate::ast::{Command, Component, Enum, Member, Type, Variant};
+
+impl Command {
+    fn get_member<S: AsRef<str>>(&self, component_name: S) -> TokenStream {
+        let name = format_ident!("{}", self.name);
+        let command_name = format_ident!(
+            "{}{}",
+            component_name.as_ref(),
+            to_upper_camel_case(&self.name)
+        );
+        quote! {
+            #name: PhantomData<#command_name>
+        }
+    }
+
+    fn get_types<S: AsRef<str>>(&self, component_name: S) -> TokenStream {
+        let command_name = format_ident!(
+            "{}{}",
+            component_name.as_ref(),
+            to_upper_camel_case(&self.name)
+        );
+        let request = format_ident!("{}Request", command_name);
+        let response = format_ident!("{}Response", command_name);
+        let request_args = if self.args.len() > 1 {
+            let arg_types = self
+                .args
+                .iter()
+                .map(|arg| arg.rust_type())
+                .map(|s| syn::parse_str::<syn::Type>(&s).expect("Can't parse type"))
+                .collect::<Vec<_>>();
+            quote! {
+                (#(#arg_types),*)
+            }
+        } else {
+            let resolved = self
+                .args
+                .first()
+                .expect("Command must have at least one argument");
+            let arg_type =
+                syn::parse_str::<syn::Type>(&resolved.rust_type()).expect("Can't parse type");
+            quote! {
+                #arg_type
+            }
+        };
+        let response_args =
+            syn::parse_str::<syn::Type>(&self.r_type.rust_type()).expect("Can't parse type");
+        quote! {
+            type #request = #request_args;
+            type #response = #response_args;
+            type #command_name = Fn(#request) -> #response;
+        }
+    }
+}
 
 impl Generator for Component {
     fn generate_one(&self) -> TokenStream {
         let enums = <Enum as Generator>::generate_multiple(&self.enums);
         let types = <Type as Generator>::generate_multiple(&self.types);
         let members = <Member as Generator>::generate_multiple(&self.members);
+        let commands = self
+            .commands
+            .iter()
+            .map(|c| c.get_member(&self.name))
+            .collect::<Vec<_>>();
+
+        let commands_types = self
+            .commands
+            .iter()
+            .map(|c| c.get_types(&self.name))
+            .collect::<Vec<_>>();
         let comments = &self.comments;
         let id = &self.id;
         let name = format_ident!("{}", &self.name);
+
+        let comma = if commands.len() > 0 && members.to_string().len() > 0 {
+            quote! { , }
+        } else {
+            quote! {}
+        };
         quote! {
             #enums
 
@@ -21,7 +90,13 @@ impl Generator for Component {
             #[id(#id)]
             pub struct #name {
                 #members
+
+                #comma
+
+                #(#commands),*
             }
+
+            #(#commands_types)*
         }
     }
 

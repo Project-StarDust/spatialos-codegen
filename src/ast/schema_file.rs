@@ -31,6 +31,9 @@ impl SchemaFile {
             #[allow(unused_imports)]
             use std::collections::HashMap;
 
+            #[allow(unused_imports)]
+            use std::marker::PhantomData;
+
             #enums
 
             #types

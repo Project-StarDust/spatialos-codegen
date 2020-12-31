@@ -102,7 +102,9 @@ fn register_node<S: AsRef<str>>(
             .map(|node| register_node(path.as_ref().to_owned() + "::" + &package.name, node))
             .flatten()
             .collect(),
-        ASTNode::SchemaNode(schema) => register_schemas(path.as_ref().to_string() + "::" + &schema.name, schema),
+        ASTNode::SchemaNode(schema) => {
+            register_schemas(path.as_ref().to_string() + "::" + &schema.name, schema)
+        }
     }
 }
 
@@ -140,6 +142,11 @@ fn resolve_component(ctx: &Context, mut comp: Component) -> Component {
         .into_iter()
         .map(|ty| resolve_type(ctx, ty))
         .collect();
+    comp.commands = comp.commands.into_iter().map(|mut com| {
+        com.args = com.args.into_iter().map(|arg| resolve_date_type(ctx, arg)).collect();
+        com.r_type = resolve_date_type(ctx, com.r_type);
+        com
+    }).collect();
     comp
 }
 
@@ -191,7 +198,7 @@ pub fn resolve_types<S: AsRef<str>>(mut ast: AST, module: S) -> AST {
     let ctx = ast
         .inner
         .iter()
-        .map(|node| register_node("crate::".to_string() + module.as_ref() , node))
+        .map(|node| register_node("crate::".to_string() + module.as_ref(), node))
         .flatten()
         .collect::<HashMap<_, _>>();
 
